@@ -1,6 +1,6 @@
 ﻿<?hda version="10.1.3.3.2 (071031)" jcharset=UTF8 encoding=utf-8?>
 @Properties LocalData
-CreateDate=7/2/11 4:14 PM
+CreateDate=7/3/11 9:33 PM
 blFieldTypes=CreateDate date
 ComponentName=SpeedyArchiver
 blDateFormat=M/d/yy {h:mm[:ss] {aa}[zzz]}!mAM,PM!tEurope/Belgrade
@@ -11,15 +11,13 @@ entryType
 location
 component
 SpeedyArchiver/SpeedyArchiver.hda
-componentExtra
-SpeedyArchiver/readme.txt
 componentClasses
 SpeedyArchiver/classes/
 componentLib
 SpeedyArchiver/lib/
-componentExtra
-SpeedyArchiver/readme.html
 weblayout
 SpeedyArchiver/
+componentExtra
+SpeedyArchiver/readme/
 @end
 

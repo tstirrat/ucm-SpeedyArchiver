@@ -43,7 +43,7 @@ fromTable
 toTable
 column
 loadOrder
-SpeedyArchiver_
+SpeedyArchiver_ServiceHandlers
 ServiceHandlers
 null
 10

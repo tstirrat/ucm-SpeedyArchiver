@@ -1,12 +1,12 @@
 <$include std_doctype_html_decl$>
 
 <head>
+	<$defaultPageTitle="Speedy Archiver"$>
+	
 	<$if not IdcService$>
 		<$DisableTargetedQuickSearchesUI = 1$>
 	<$endif$>
 	
-	
-	<$defaultPageTitle="Speedy Archiver"$>
 	<$searchFormType = "standard"$>
 	<$include std_html_head_declarations$>
 	
@@ -15,12 +15,19 @@
 		<$include str_trim_function$>
 	<$endif$>
 	<$include query_form_minisearch_script$>
+	
 	</script>
+
+	<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/jquery-1.6.1.min.js"></script>
+	<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/ui/js/jquery-ui-1.8.14.custom.min.js"></script>
+	<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/ajaxupload.3.6.js"></script>
+	
+	<link type="text/css" rel="stylesheet" href="<$HttpWebRoot$>SpeedyArchiver/ui/css/redmond/jquery-ui.css"  />
 	
 	<style type="text/css">
-	.hide {
-		display: none;
-	}
+		.hide {
+			display: none;
+		}
 	</style>
 </head>
 
@@ -32,182 +39,478 @@
 	<$include std_page_begin$>
 <$endif$>
 
-Welcome to Vedran's "Speedy Archiver". 
-<br/>
-<br/>
-Select your archive for download or just upload one.
-<br/>
+<$include std_header$>
+
+	<table class="xuiTitleTable" width="100%" cellpadding="0" cellspacing="0" summary="">
+		<tr>
+			<td class="xuiPageHeadingCell">
+				<h1 class="xuiPageHeadingText">Speedy Archiver</h1></td>
+			<td class="xuiPageHeadingCell" style="text-align:right" align="right">
+				&nbsp;</td>
+		</tr>
+	</table>
+
+<br style="line-height:25px">
 
 <$IDC_Name=strReplace(HttpRelativeWebRoot, "/", "")$>
 <$executeService("GET_ARCHIVES")$>
 <$rsSort("ArchiveData", "aArchiveName", "string", "asc")$>
 
-Success: <$uploadedArchive$>
+<$ if ArchiveData $>
+	<$include archive_jobs_table $>
+<$ else $>
+		<div class="xuiDescription">No archive jobs have been defined</div>
+<$ endif $>
 
-<table id="speedy">
-	<thead>
-		<tr>
-			<th>Archive Name</th>
-			<th>Status</th>
-			<th>Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		<$ oldArchiveName = archiveName $>
-		<$loop ArchiveData$>
-				<tr id="<$ArchiveData.aArchiveName$>">
-					<td><$ArchiveData.aArchiveName$></td>
-					<td>
-						<span class="status">
-							<$ if uploadedArchive like "yes" and strEquals(archiveName, oldArchiveName) $>
-								Upload Complete
-							<$ endif $>
-						</span>
-					</td>
-					<td>
-						<form enctype="multipart/form-data" method="POST" action="<$HttpRelativeWebRoot$>idcplg">
-							<input type="hidden" name="IdcService" value="SPEEDY_ARCHIVER_UPLOAD" />
-							<input type="hidden" name="RedirectUrl" value="" />
-							<input type="hidden" name="archiveName" value="<$ArchiveData.aArchiveName$>" />
-							<input type="file" name="zipArchive" />
-							<input type="submit" name="uploadButton" value="Upload" />
-						</form>
-					</td>
-					<td class="actions">
-						[<a name="uploadArchive" rel="<$ ArchiveData.aArchiveName $>" href="#">Upload</a>]
-						
-						[<a href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>">Download</a>]
-						
-						[Edit Query]
+<!-- Edit query dialog -->
+<div id="edit-query-dialog" class="hide dialog" style="text-align: left;">
+	<form id="edit-query-form">
+		<input type="hidden" id="edit-query-form-valid" value="0" />
+		<div class="group">
+			<div>
+				<!-- div>
+					<input type="checkbox" id="IsCustom" name="IsCustom" />
+					<label for="IsCustom">Custom Query Expression</label>
+				</div -->
+				<textarea id="CustomQuery" rows="5" cols="75">dSecurityGroup = 'Public' AND dDocName LIKE 'D%'</textarea>
+			</div>
+			
+			<div>
+				<h2>Query Options</h2>
+				<div>
+					<input type="checkbox" id="UseExportDate" name="UseExportDate" value="1" checked="checked" />
+					<label for="UseExportDate">Export Revisions with Release Date later than most recent Export Date</label>
+				</div>
+				<div>
+					<input type="checkbox" id="AllowExportPublished" name="AllowExportPublished" value="1" />
+					<label for="AllowExportPublished">Allow export of Published Revisions</label>
+				</div>
+				<input type="radio" id="AllRevisions" name="RevisionType" value="AllRevisions" />
+				<label for="AllRevisions">All Selected Revisions</label>
+				
+				<input type="radio" id="LatestRevisions" name="RevisionType" value="LatestRevisions" checked="checked" />
+				<label for="LatestRevisions">Latest Revisions</label>
+				
+				<input type="radio" id="NotLatestRevisions" name="RevisionType" value="NotLatestRevisions" />
+				<label for="NotLatestRevisions">Not Latest Revisions</label>
+				
+				<input type="radio" id="MostRecentMatching" name="RevisionType" value="MostRecentMatching" />
+				<label for="MostRecentMatching">Single Revision Replication</label>
+			</div>
+		</div>
+	</form>
+	<div id="edit-query-wait">
+		Loading query details for <span class="archive-name">Archive name</span>, please wait...
+	</div>
 	
-						[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="export-action">Export</a>]
-	
-						[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="import-action">Import</a>]
-						
-						<!-- EXPORT FORM -->
-						<form class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
-							<input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
-							<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
-							<input type="hidden" name="dataSource" value="RevisionIDs" />
-							<input type="hidden" name="RedirectUrl" value="" />
-							<input type="hidden" name="IsJson" value="1" />
-							<input type="hidden" name="aArchiveName" value="<$ArchiveData.aArchiveName$>" />
-							<input type="hidden" name="aDoDelete" value="0" />
-							<input type="submit" name="uploadButton" value="Upload" />
-						</form>
-						
-						<!-- IMPORT FORM -->
-						<form class="hide import" method="post" action="<$HttpRelativeWebRoot$>idcplg">
-							<input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
-							<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
-							<input type="hidden" name="RedirectUrl" value="" />
-							<input type="hidden" name="IsJson" value="1" />
-							<input type="hidden" name="aArchiveName" value="<$ ArchiveData.aArchiveName $>" />
-							<input type="hidden" name="aImportDocuments" value="true" />
-							<input type="submit" name="uploadButton" value="Upload" />
-					</form>
-					</td>
-				</tr>
-			<br/>
-		<$endloop$>
-	</tbody>
-</table>
-	<script type="text/javascript">
-		$(function() {
+	<!-- EDIT_ARCHIVEDATA form -->
+	<form class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post" id="edit-archivedata-form">
+		<input type="hidden" name="IdcService" value="EDIT_ARCHIVEDATA" />
+		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+		<input type="hidden" name="EditItems" value="aExportQuery" />
+		<input type="hidden" class="archive-name" name="aArchiveName" value="" />
+		<input type="hidden" name="IsJson" value="1" />
 		
-			$("a[name='uploadArchive']").each(function () {
-				new AjaxUpload($(this), {
-					action : '<$HttpRelativeWebRoot$>idcplg',
-					name: 'primaryFile',
-					data : {},
-					onSubmit : function(file, ext)
-					{
-				  		$('#dialog-message-ajaxUpload').dialog('open');
-				  		this.setData({
-							'IdcService' : 'SPEEDY_ARCHIVER_UPLOAD',
-							'IsSoap' : 1,
-							'archiveName' : this._button.rel,
-							'file' : 'zipArchive'
-						});
+		<input type="hidden" id="aExportQuery" name="aExportQuery" />
+	</form>
+</div>
+
+<!-- GET_ARCHIVES form -->
+<form class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post" id="get-archives-form">
+	<input type="hidden" name="IdcService" value="GET_ARCHIVES" />
+	<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+	<input type="hidden" name="IsJson" value="1" />
+</form>
+
+<script type="text/javascript">
+	$(function() { // document.ready() {
+		
+		$('#edit-query-dialog').dialog({ 
+			title: 'Edit Query Options',
+			modal: true,
+			width: 685,
+			autoOpen: false,
+			buttons: {
+				"OK": function () {
+					$('#edit-query-form').submit();
+					$('#edit-query-form-valid').val('0'); // reset valid flag
+					$(this).dialog('close');
+				},
+				"Cancel": function () {
+					$('#edit-query-form-valid').val('0'); // reset valid flag
+					$(this).dialog('close');
+				}
+			}
+		});
+		
+		$('#edit-query-form').submit(function (e) {
+			e.preventDefault();
+			
+			if ($('#edit-query-form-valid').val() == "1") {
+			
+				// get the correct format for the aExportQuery field
+				$('#aExportQuery').val(calculateExportQuery());
+				
+				var archiveName = $('#edit-archivedata-form input.archive-name').val();
+				var statusArea = $('#' + archiveName).closest('tr').find('.status');
+				
+				var form = $('#edit-archivedata-form');
+				
+				//console.log(form.serialize());
+				
+				$.ajax({
+					type: 'POST',
+					url: form.attr('action'),
+					data: form.serialize(),
+					success: function(data, textStatus) {
+						statusArea.text('Export query for "' + archiveName + '" changed');
 					},
-					onChange : function(file, ext)
+					error: function(data) {
+						statusArea.html('<span class="xuiError">There was a problem editing the export query</span>');
+					},	
+					dataType: 'json'
+				});
+				
+			} // if valid
+			
+		});
+		
+		$('.actions a.edit-query').click(function(e) {
+			
+			var archiveName = $(this).closest('div').attr('id');
+			
+			$('#edit-query-dialog span.archive-name').text(archiveName);
+			$('#edit-archivedata-form input.archive-name').val(archiveName);
+			
+			$('#edit-query-dialog').dialog('open');
+			
+			// hide the form until the config has been retrieved
+			$('#edit-query-form').hide();
+			$('#edit-query-wait').show();
+			
+			// GET_ARCHIVES
+			$.ajax({
+				type: 'POST',
+				url: $('#get-archives-form').attr('action'),
+				data: $('#get-archives-form').serialize(),
+				success: function (data, textStatus) {
+					// refresh all archive data
+					processArchiveData(data);
+					
+					// load this export query data into the form
+					if (loadExportQuery(archiveName))
 					{
-	   					if(ext != "zip")
-	   					{
-	    						$('#dialog-message-ajaxUpload-wrong').dialog('open');
-	    						return false;
-	   					}
-	  				},
-					onComplete: function(file, response)
-					{
-						$('#dialog-message-ajaxUpload').dialog('close');
-						var contentId="";
-						$(response).find("idc\\:document").each(function(){
-							if($(this).attr("uploadedArchive") != "true")
-							{
-								alert("Failed to upload the file.");
-								return;
-							}else{							
-								alert("Upload Successfull");
-							}
-						});
+						// show the form
+						$('#edit-query-form').show();
+						$('#edit-query-wait').hide();
 					}
-				}); 				
-				
+					else
+					{
+						$('#edit-query-wait').text('Error reading export query for ' + archiveName);
+					}
+					
+				},
+				error: function(data) {
+					$('#edit-query-wait').text('Unable to get archive data for ' + archiveName);
+				},
+				dataType: 'json'
 			});
-
 			
+			e.preventDefault();
+		});
+	
+		$('.actions a.import-action').click(function(e) {
+			e.preventDefault();
 			
+			var $this = $(this);
+			
+			var statusArea = $this.closest('tr').find('.status');
+			
+			var archiveName = $this.attr('rel');
+			
+			var form = $this.closest('div').find('form.import');
+			
+			statusArea.text('Requesting import...');
+			
+			$.ajax({
+				type: 'POST',
+				url: form.attr('action'),
+				data: form.serialize(),
+				success: function(data, textStatus) {
+					statusArea.text('Import for archive "' + archiveName + '" was successfully started');
+				},
+				error: function(data) {
+					statusArea.html('<span class="xuiError">There was a problem executing the import</span>');
+				},
+				dataType: 'json'
+			});
+			
+		});
 		
-			$('.actions a.import-action').click(function(e) {
-				e.preventDefault();
+		$('.actions a.export-action').click(function(e) {
+			e.preventDefault();
+			
+			var $this = $(this);
+			
+			var statusArea = $this.closest('tr').find('.status');
+			
+			var archiveName = $this.attr('rel');
+			
+			var form = $this.closest('div').find('form.export');
+			
+			statusArea.text('Requesting export...');
+			
+			$.ajax({
+				type: 'POST',
+				url: form.attr('action'),
+				data: form.serialize(),
+				success: function(data, textStatus) {
+					statusArea.text('Export for archive "' + archiveName + '" was successfully started');
+				},
+				error: function(data) {
+					statusArea.html('<span class="xuiError">There was a problem executing the export</span>');
+				},
+				dataType: 'json'
+			});
+		});
+		
+		/**
+		 * Turns the visual form into a the archivedata parameter aExportQuery
+		 */
+		var calculateExportQuery = function() {
+			var fieldValue = "Standard Query	ValuePanel 	";
+			var tempVal = "";
+			
+			tempVal = $('#UseExportDate').is(':checked') ? '1' : '0';
+			fieldValue += "UseExportDate " + tempVal + "	";
+			
+			tempVal = $('#AllowExportPublished').is(':checked') ? '1' : '0';
+			fieldValue += "AllowExportPublished " + tempVal + "	";
+			
+			tempVal = $('#AllRevisions').is(':checked') ? '1' : '0';
+			fieldValue += "AllRevisions " + tempVal + "	";
+			
+			tempVal = $('#LatestRevisions').is(':checked') ? '1' : '0';
+			fieldValue += "LatestRevisions " + tempVal + "	";
+			
+			tempVal = $('#NotLatestRevisions').is(':checked') ? '1' : '0';
+			fieldValue += "NotLatestRevisions " + tempVal + "	";
+			
+			tempVal = $('#MostRecentMatching').is(':checked') ? '1' : '0';
+			fieldValue += "MostRecentMatching " + tempVal + "	";
+			
+			// TODO: clauses logic, prob not neccesary
+			tempVal = "";
+			fieldValue += "CurrentIndex -1	Clauses " + tempVal + "	";
+			
+			tempVal = escapeExportQuery();
+			fieldValue += "CustomQuery " + tempVal + "	";
+			
+			/*/ custom query always enabled for now
+			tempVal = $('#IsCustom').is(':checked') ? '1' : '0';
+			fieldValue += "IsCustom " + tempVal;*/
+			
+			fieldValue += "IsCustom 1";
+			
+			//console.log(fieldValue);
+			
+			return fieldValue;
+		}
+		
+		/**
+		 * Escapes the export query as is required
+		 */
+		var escapeExportQuery = function() {
+			var QueryText = $('#CustomQuery').val();
+			
+			//console.log(QueryText);
+			
+			QueryText = QueryText.replace(/%/g, "#%"); // % = #%
+			//QueryText = QueryText.replace(/\n/g, "\n"); // escape new lines
+			QueryText = QueryText.replace(/\s/g, "%"); // whitespace = %
+			
+			//console.log(QueryText);
+			
+			return QueryText;
+		}
+		
+		/**
+		 * Unescapes the export query as is required
+		 */
+		var unescapeExportQuery = function(QueryText) {
+			//console.log(QueryText);
+			
+			
+			QueryText = QueryText.replace(/\\n/g, "\n");
+			QueryText = QueryText.replace(/%/g, " ");
+			QueryText = QueryText.replace(/# /g, "%");
+			
+			//console.log(QueryText);
+			
+			return QueryText;
+		}
+		
+		/**
+		 * Loads all archive data settings into the respective rows.
+		 */
+		var processArchiveData = function (data) {
+			if (data.ResultSets.ArchiveData && data.ResultSets.ArchiveData.rows.length > 0)
+			{
+				var archives = data.ResultSets.ArchiveData.rows;
+			
+				for (var i = 0; i < archives.length; i++)
+				{
+					// put the archive config into the input.config element (hidden)
+					$('#' + archives[i][0]).find('input.config').val(archives[i][2]);
+				}
+			}
+		}
+		
+		// load this export query data into the form
+		var loadExportQuery = function(archiveName) {
+			var archiveConfig = $('#' + archiveName).find('input.config').val();
+			
+			var data = {};
+			var key = "";
+			var value = "";
+			
+			// parse the export query out of it
+			var rx = /aExportQuery=(.*)\n/;
+			
+			var aExportQuery = rx.exec(archiveConfig);
+			
+			// is there a first match
+			if (aExportQuery != null && aExportQuery[1])
+			{
+				//console.log(aExportQuery[1]);
 				
-				var $this = $(this);				
-				var archiveName = $this.attr('rel');				
-				var form = $this.parent().find('form.import');
+				var params = aExportQuery[1].split("\t");
 				
-				$.ajax({
-					type: 'POST',
-					url: form.attr('action'),
-					data: form.serialize(),
-					success: function(data, textStatus) {
-						$this.parent().parent().find('.status').text('Import for archive "' + archiveName + '" was successfully started');
-						//alert('Import for archive "' + archiveName + '" was successfully started');
-					},
-					error: function(data) {
-						$this.parent().parent().find('.status').html('<span class="xuiError">There was a problem executing the import</span>');
-						//alert('There was a problem executing the import');
-					},
-					dataType: 'json'
-				});
+				//console.log(params);
 				
+				// parse parameters
+				for (var i = 0; i < params.length; i++)
+				{
+					// is this a valid parameter?
+					if (params[i].indexOf(" ") >= 0)
+					{
+						key = params[i].substring(0, params[i].indexOf(" "));
+						value = params[i].substring(params[i].indexOf(" ") + 1);
+						data[key] = value;
+					}
+				}
+				
+				// store in DOM
+				$('#' + archiveName).data('export-query', data);
+				
+				// load into query dialog
+				loadQueryDialog(data);
+				
+				return true;
+			}
+			
+			// no data found
+			return false;
+		}
+		
+		/**
+		 * loads an archive job's data into the query editor dialog
+		 */
+		var loadQueryDialog = function(data) {
+			if (data.AllRevisions == '1') {
+				$('#AllRevisions').attr('checked', 'checked');
+			} else {
+				$('#AllRevisions').removeAttr('checked');
+			}
+			
+			if (data.LatestRevisions == '1') {
+				$('#LatestRevisions').attr('checked', 'checked');
+			} else {
+				$('#LatestRevisions').removeAttr('checked');
+			}
+			
+			if (data.NotLatestRevisions == '1') {
+				$('#NotLatestRevisions').attr('checked', 'checked');
+			} else {
+				$('#NotLatestRevisions').removeAttr('checked');
+			}
+			
+			if (data.MostRecentMatching == '1') {
+				$('#MostRecentMatching').attr('checked', 'checked');
+			} else {
+				$('#MostRecentMatching').removeAttr('checked');
+			}
+			
+			/* not used at the moment
+			if (data.IsCustom == '1') {
+				$('#IsCustom').attr('checked', 'checked');
+			} else {
+				$('#IsCustom').removeAttr('checked');
+			}*/
+			
+			if (data.UseExportDate == '1') {
+				$('#UseExportDate').attr('checked', 'checked');
+			} else {
+				$('#UseExportDate').removeAttr('checked');
+			}
+			
+			if (data.AllowExportPublished == '1') {
+				$('#AllowExportPublished').attr('checked', 'checked');
+			} else {
+				$('#AllowExportPublished').removeAttr('checked');
+			}
+			
+			
+			$('#CustomQuery').val(unescapeExportQuery(data.CustomQuery));
+			
+			$('#edit-query-form-valid').val('1'); // form is now valid
+		}
+		
+		
+		//upload ajax dialog
+		$("a[name='uploadArchive']").each(function () {
+			new AjaxUpload($(this), {
+				action : '<$HttpRelativeWebRoot$>idcplg',
+				name: 'primaryFile',
+				data : {},
+				onSubmit : function(file, ext)
+				{
+			  		$('#dialog-message-ajaxUpload').dialog('open');
+			  		this.setData({
+						'IdcService' : 'SPEEDY_ARCHIVER_UPLOAD',
+						'IsSoap' : 1,
+						'archiveName' : this._button.rel,
+						'file' : 'zipArchive'
+					});
+				},
+				onChange : function(file, ext)
+				{
+   					if(ext != "zip")
+   					{
+    						$('#dialog-message-ajaxUpload-wrong').dialog('open');
+    						return false;
+   					}
+  				},
+				onComplete: function(file, response)
+				{
+					$('#dialog-message-ajaxUpload').dialog('close');
+					var contentId="";
+					$(response).find("idc\\:document").each(function(){
+						if($(this).attr("uploadedArchive") != "true")
+						{
+							alert("Failed to upload the file.");
+							return;
+						}else{							
+							alert("Upload Successfull");
+						}
+					});
+				}
 			});
 			
-			$('.actions a.export-action').click(function(e) {
-				e.preventDefault();
-			
-				var $this = $(this);		
-				var archiveName = $this.attr('rel');				 
-				var form = $this.parent().find('form.export');
-				
-				$.ajax({
-					type: 'POST',
-					url: form.attr('action'),
-					data: form.serialize(),
-					success: function(data, textStatus) {
-						$this.parent().parent().find('.status').text('Export for archive "' + archiveName + '" was successfully started');
-					},
-					error: function(data) {
-						$this.parent().parent().find('.status').text('<span class="xuiError">There was a problem executing the export</span>');
-					},
-					dataType: 'json'
-				});
-			});
-			
-			
+			//initializing dialogs
 			$("#dialog-message-ajaxUpload").dialog({
 	   			resizable: false,
-	   			height:140,
+	   			height:240,
 	  			modal: true,
 	   			autoOpen: false
 	  		});
@@ -218,15 +521,13 @@ Success: <$uploadedArchive$>
 	   			modal: true,
 	   			autoOpen: false
 	  		});
-
 			
-		}); // document.ready()
-	</script>
-	
-	
-	
-	
-	
+		});
+		
+		
+	}); // document.ready()
+</script>
+
 	
 	<!--"DIALOG BOX"-->
 	<div id="dialog-message-ajaxUpload-wrong" title="Type not supported">
@@ -246,6 +547,8 @@ Success: <$uploadedArchive$>
 		<br/>
 	 	<img src="<$HttpWebRoot$>SpeedyArchiver/loading.gif" name="loadingBar"/>
 	</div>
-	
+
+
+	<$include std_page_end$>
 </body>
 </html>

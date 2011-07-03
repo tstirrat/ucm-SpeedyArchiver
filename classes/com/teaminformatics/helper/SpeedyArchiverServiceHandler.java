@@ -24,7 +24,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 
-
+ 
 /**
  * Speed up your transfer of archives from one environment to another by using the OOTB pages and services defined below
  */
@@ -49,7 +49,6 @@ public class SpeedyArchiverServiceHandler extends ServiceHandler{
 		}
 		
 		String archiveFolderPath = SharedObjects.getEnvironmentValue("IntradocDir") + "archives/" + archiveName;
-		String outFile = "C:\\" + archiveName + "_download.zip";
 		
 		boolean exists = (new File(archiveFolderPath)).exists(); 
 		if (exists) { 

@@ -10,28 +10,135 @@ SpeedyArchiver htmlIncludeOrString
 
 <@dynamichtml custom_finish_layout_init@>
 
-  <$include super.custom_finish_layout_init$>
+  <$ include super.custom_finish_layout_init $>
 
-  <$if dUser like "sysadmin"$>
+  <$ if UserIsAdmin $>
 
-  navBuilder.menuB.addTopLevelNode('SPEEDY_ARCHIVE','SEARCH');       
-  navBuilder.addChildNodeTo('NAVTREE', 'item', 'id==SPEEDY_ARCHIVE', 'label==Speedy Archive', 'url==<$HttpCgiPath$>?IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME');
+  if (navBuilder.menuB)
+  {
+  	navBuilder.menuB.addTopLevelNode('SPEEDY_ARCHIVE','SEARCH');       
+  	navBuilder.addChildNodeTo('NAVTREE', 'item', 'id==SPEEDY_ARCHIVE', 'label==Speedy Archive', 'url==<$HttpCgiPath$>?IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME');
+  }
 
-  <$endif$>
+  <$ endif $>
     
 
 <@end@>
 
-<@dynamichtml std_js_bootstrap_vars@>
-	<$ include super.std_js_bootstrap_vars $>
+<@dynamichtml archive_jobs_table@>
+	<$slimTableCaption = "<caption class=\"xuiCaption\">Archive Jobs</caption>"$>
+	<$resultSetClass = "document", resultSetType = "activeworkflow"$>
+
+	<$exec inc("setup_archive_jobs_table_header")$>
+	<$include slim_table_header$>
+
+	<$exec inc("setup_archive_jobs_table_row")$>
+	<$exec inc("create_slim_table_row_include")$>
 	
-	<$if Page like "SPEEDY_ARCHIVER_HOME"$>
-		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/jquery-1.6.1.min.js"></script>
-		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/jquery-ui-1.7.2.custom.min.js"></script>
-		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/ajaxupload.3.6.js"></script>
-	<$endif$>
+	<$loop ArchiveData$>
+		<$include slim_table_row_include$>
+	<$endloop$>
+
+	<$include slim_table_footer$>
 <@end@>
 
+
+<@dynamichtml setup_archive_jobs_table_row@>
+	<$exec setValue("RowData", "name", "<$ aArchiveName $>")$>
+	<$exec setValue("RowData", "status", "<$ include speedy_archive_status $>")$>
+	<!-- exec setValue("RowData", "upload", "<$ include speedy_archive_upload_form $>")-->
+	<$exec setValue("RowData", "actions", "<$ include speedy_archive_action_links $>")$>
+<@end@>
+
+<@dynamichtml speedy_archive_status@>
+	<span id="status-<$ aArchiveName $>" class="status">
+		<$ if uploadedArchive like "true" and strEquals(aArchiveName, archiveName) $>
+			Upload Complete
+		<$ endif $>
+	</span>
+<@end@>
+
+<@dynamichtml speedy_archive_action_links@>
+	<div id="<$ aArchiveName $>" class="actions">
+		[<a class="xuiLinkText2_Sm" href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>">Download</a>]
+		
+		[<a class="xuiLinkText2_Sm" name="uploadArchive" rel="<$ ArchiveData.aArchiveName $>" href="#">Upload</a>]
+						
+		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="edit-query xuiLinkText2_Sm">Edit Query</a>]
+	
+		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="export-action xuiLinkText2_Sm">Export</a>]
+	
+		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="import-action xuiLinkText2_Sm">Import</a>]
+							
+		<!-- EXPORT FORM -->
+		<form class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+			<input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
+			<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+			<input type="hidden" name="dataSource" value="RevisionIDs" />
+			<input type="hidden" name="RedirectUrl" value="" />
+			<input type="hidden" name="IsJson" value="1" />
+			<input type="hidden" name="aArchiveName" value="<$ aArchiveName $>" />
+			<input type="hidden" name="aDoDelete" value="0" />
+		</form>
+		
+		<!-- IMPORT FORM -->
+		<form class="hide import" method="post" action="<$ HttpRelativeWebRoot $>idcplg">
+			<input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
+			<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+			<input type="hidden" name="RedirectUrl" value="" />
+			<input type="hidden" name="IsJson" value="1" />
+			<input type="hidden" name="aArchiveName" value="<$ aArchiveName $>" />
+			<input type="hidden" name="aImportDocuments" value="true" />
+		</form>
+		
+		<!-- config -->
+		<form class="hide">
+			<input type="hidden" class="config" name="config" />
+		</form>
+	</div>
+<@end@>
+
+<@dynamichtml speedy_archive_upload_form@>
+	<form enctype="multipart/form-data" method="POST" action="<$HttpRelativeWebRoot$>idcplg">
+		<input type="hidden" name="IdcService" value="SPEEDY_ARCHIVER_UPLOAD" />
+		<input type="hidden" name="RedirectUrl" value="" />
+		<input type="hidden" name="archiveName" value="<$ aArchiveName $>" />
+		<input type="file" name="zipArchive" />
+		<input type="submit" name="uploadButton" value="Upload" />
+	</form>
+<@end@>
+
+<@dynamichtml setup_archive_jobs_table_header@>
+	<$UseRowHighlighting = 1$>
+	<$exec rsCreateResultSet("ColumnProperties", "id,width,headerLabel,rowAlign")$>
+
+	<$exec rsAppendNewRow("ColumnProperties")$>
+	<$exec setValue("ColumnProperties", "id", "name")$>
+	<$exec setValue("ColumnProperties", "width", "150px")$>
+	<$exec setValue("ColumnProperties", "headerLabel", "Archive Name")$>
+	<$exec setValue("ColumnProperties", "rowAlign", "left")$>
+
+	<$exec rsAppendNewRow("ColumnProperties")$>
+	<$exec setValue("ColumnProperties", "id", "status")$>
+	<$exec setValue("ColumnProperties", "headerLabel", "wwStatus")$>
+	<$exec setValue("ColumnProperties", "rowAlign", "left")$>
+	
+	<--
+	<exec rsAppendNewRow("ColumnProperties")>
+	<exec setValue("ColumnProperties", "id", "upload")>
+	<exec setValue("ColumnProperties", "width", "325px")>
+	<exec setValue("ColumnProperties", "headerLabel", "Upload")>
+	<exec setValue("ColumnProperties", "rowAlign", "left")>
+	-->
+	
+	<$exec rsAppendNewRow("ColumnProperties")$>
+	<$exec setValue("ColumnProperties", "id", "actions")$>
+	<$exec setValue("ColumnProperties", "width", "280px")$>
+	<$exec setValue("ColumnProperties", "headerLabel", "wwActions")$>
+	<$exec setValue("ColumnProperties", "rowAlign", "center")$>
+	
+	<$tableSummary = "Archive Jobs"$>
+<@end@>
 
 
 </body></html>
