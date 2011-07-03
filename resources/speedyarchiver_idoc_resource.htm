@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>
+SpeedyArchiver htmlIncludeOrString
+</title>
+</head>
+<body>
+
+
+<@dynamichtml custom_finish_layout_init@>
+
+  <$include super.custom_finish_layout_init$>
+
+  <$if dUser like "sysadmin"$>
+
+  navBuilder.menuB.addTopLevelNode('SPEEDY_ARCHIVE','SEARCH');       
+  navBuilder.addChildNodeTo('NAVTREE', 'item', 'id==SPEEDY_ARCHIVE', 'label==Speedy Archive', 'url==<$HttpCgiPath$>?IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME');
+
+  <$endif$>
+    
+
+<@end@>
+
+<@dynamichtml std_js_bootstrap_vars@>
+	<$ include super.std_js_bootstrap_vars $>
+	
+	<$if Page like "SPEEDY_ARCHIVER_HOME"$>
+		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/jquery-1.6.1.min.js"></script>
+		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/jquery-ui-1.7.2.custom.min.js"></script>
+		<script type="text/javascript" src="<$HttpWebRoot$>SpeedyArchiver/ajaxupload.3.6.js"></script>
+	<$endif$>
+<@end@>
+
+
+
+</body></html>

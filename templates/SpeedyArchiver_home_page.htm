@@ -1,0 +1,251 @@
+<$include std_doctype_html_decl$>
+
+<head>
+	<$if not IdcService$>
+		<$DisableTargetedQuickSearchesUI = 1$>
+	<$endif$>
+	
+	
+	<$defaultPageTitle="Speedy Archiver"$>
+	<$searchFormType = "standard"$>
+	<$include std_html_head_declarations$>
+	
+	<script language="JavaScript">
+	<$if not IdcService$>
+		<$include str_trim_function$>
+	<$endif$>
+	<$include query_form_minisearch_script$>
+	</script>
+	
+	<style type="text/css">
+	.hide {
+		display: none;
+	}
+	</style>
+</head>
+
+<$if not IdcService$>
+	<body style="width:auto;height:auto;margin:10px;background:#FFFFFF">
+	<$include home_page_static_content$>
+<$else$>
+	<$include body_def$>
+	<$include std_page_begin$>
+<$endif$>
+
+Welcome to Vedran's "Speedy Archiver". 
+<br/>
+<br/>
+Select your archive for download or just upload one.
+<br/>
+
+<$IDC_Name=strReplace(HttpRelativeWebRoot, "/", "")$>
+<$executeService("GET_ARCHIVES")$>
+<$rsSort("ArchiveData", "aArchiveName", "string", "asc")$>
+
+Success: <$uploadedArchive$>
+
+<table id="speedy">
+	<thead>
+		<tr>
+			<th>Archive Name</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<$ oldArchiveName = archiveName $>
+		<$loop ArchiveData$>
+				<tr id="<$ArchiveData.aArchiveName$>">
+					<td><$ArchiveData.aArchiveName$></td>
+					<td>
+						<span class="status">
+							<$ if uploadedArchive like "yes" and strEquals(archiveName, oldArchiveName) $>
+								Upload Complete
+							<$ endif $>
+						</span>
+					</td>
+					<td>
+						<form enctype="multipart/form-data" method="POST" action="<$HttpRelativeWebRoot$>idcplg">
+							<input type="hidden" name="IdcService" value="SPEEDY_ARCHIVER_UPLOAD" />
+							<input type="hidden" name="RedirectUrl" value="" />
+							<input type="hidden" name="archiveName" value="<$ArchiveData.aArchiveName$>" />
+							<input type="file" name="zipArchive" />
+							<input type="submit" name="uploadButton" value="Upload" />
+						</form>
+					</td>
+					<td class="actions">
+						[<a name="uploadArchive" rel="<$ ArchiveData.aArchiveName $>" href="#">Upload</a>]
+						
+						[<a href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>">Download</a>]
+						
+						[Edit Query]
+	
+						[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="export-action">Export</a>]
+	
+						[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="import-action">Import</a>]
+						
+						<!-- EXPORT FORM -->
+						<form class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+							<input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
+							<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+							<input type="hidden" name="dataSource" value="RevisionIDs" />
+							<input type="hidden" name="RedirectUrl" value="" />
+							<input type="hidden" name="IsJson" value="1" />
+							<input type="hidden" name="aArchiveName" value="<$ArchiveData.aArchiveName$>" />
+							<input type="hidden" name="aDoDelete" value="0" />
+							<input type="submit" name="uploadButton" value="Upload" />
+						</form>
+						
+						<!-- IMPORT FORM -->
+						<form class="hide import" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+							<input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
+							<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+							<input type="hidden" name="RedirectUrl" value="" />
+							<input type="hidden" name="IsJson" value="1" />
+							<input type="hidden" name="aArchiveName" value="<$ ArchiveData.aArchiveName $>" />
+							<input type="hidden" name="aImportDocuments" value="true" />
+							<input type="submit" name="uploadButton" value="Upload" />
+					</form>
+					</td>
+				</tr>
+			<br/>
+		<$endloop$>
+	</tbody>
+</table>
+	<script type="text/javascript">
+		$(function() {
+		
+			$("a[name='uploadArchive']").each(function () {
+				new AjaxUpload($(this), {
+					action : '<$HttpRelativeWebRoot$>idcplg',
+					name: 'primaryFile',
+					data : {},
+					onSubmit : function(file, ext)
+					{
+				  		$('#dialog-message-ajaxUpload').dialog('open');
+				  		this.setData({
+							'IdcService' : 'SPEEDY_ARCHIVER_UPLOAD',
+							'IsSoap' : 1,
+							'archiveName' : this._button.rel,
+							'file' : 'zipArchive'
+						});
+					},
+					onChange : function(file, ext)
+					{
+	   					if(ext != "zip")
+	   					{
+	    						$('#dialog-message-ajaxUpload-wrong').dialog('open');
+	    						return false;
+	   					}
+	  				},
+					onComplete: function(file, response)
+					{
+						$('#dialog-message-ajaxUpload').dialog('close');
+						var contentId="";
+						$(response).find("idc\\:document").each(function(){
+							if($(this).attr("uploadedArchive") != "true")
+							{
+								alert("Failed to upload the file.");
+								return;
+							}else{							
+								alert("Upload Successfull");
+							}
+						});
+					}
+				}); 				
+				
+			});
+
+			
+			
+		
+			$('.actions a.import-action').click(function(e) {
+				e.preventDefault();
+				
+				var $this = $(this);				
+				var archiveName = $this.attr('rel');				
+				var form = $this.parent().find('form.import');
+				
+				$.ajax({
+					type: 'POST',
+					url: form.attr('action'),
+					data: form.serialize(),
+					success: function(data, textStatus) {
+						$this.parent().parent().find('.status').text('Import for archive "' + archiveName + '" was successfully started');
+						//alert('Import for archive "' + archiveName + '" was successfully started');
+					},
+					error: function(data) {
+						$this.parent().parent().find('.status').html('<span class="xuiError">There was a problem executing the import</span>');
+						//alert('There was a problem executing the import');
+					},
+					dataType: 'json'
+				});
+				
+			});
+			
+			$('.actions a.export-action').click(function(e) {
+				e.preventDefault();
+			
+				var $this = $(this);		
+				var archiveName = $this.attr('rel');				 
+				var form = $this.parent().find('form.export');
+				
+				$.ajax({
+					type: 'POST',
+					url: form.attr('action'),
+					data: form.serialize(),
+					success: function(data, textStatus) {
+						$this.parent().parent().find('.status').text('Export for archive "' + archiveName + '" was successfully started');
+					},
+					error: function(data) {
+						$this.parent().parent().find('.status').text('<span class="xuiError">There was a problem executing the export</span>');
+					},
+					dataType: 'json'
+				});
+			});
+			
+			
+			$("#dialog-message-ajaxUpload").dialog({
+	   			resizable: false,
+	   			height:140,
+	  			modal: true,
+	   			autoOpen: false
+	  		});
+
+	  		$("#dialog-message-ajaxUpload-wrong").dialog({
+	   			resizable: false,
+	   			height:140,
+	   			modal: true,
+	   			autoOpen: false
+	  		});
+
+			
+		}); // document.ready()
+	</script>
+	
+	
+	
+	
+	
+	
+	<!--"DIALOG BOX"-->
+	<div id="dialog-message-ajaxUpload-wrong" title="Type not supported">
+		<br/> 
+	 	<p>
+	  		You can upload only Zip files (make sure they are downloaded using SpeedyArchiver)!
+	 	</p>
+		<br/>
+	</div>
+	
+	<!--c="DIALOG BOX"-->
+	<div id="dialog-message-ajaxUpload" title="Uploading!">
+		<p>
+	  		Please wait for you file to be uploaded.  
+	 	</p> 
+		<br/> 
+		<br/>
+	 	<img src="<$HttpWebRoot$>SpeedyArchiver/loading.gif" name="loadingBar"/>
+	</div>
+	
+</body>
+</html>
