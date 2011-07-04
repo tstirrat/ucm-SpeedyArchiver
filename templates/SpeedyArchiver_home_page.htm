@@ -52,7 +52,7 @@
 
 <br style="line-height:25px">
 
-<$IDC_Name=strReplace(HttpRelativeWebRoot, "/", "")$>
+<$IDC_Name=IDC_Name$>
 <$executeService("GET_ARCHIVES")$>
 <$rsSort("ArchiveData", "aArchiveName", "string", "asc")$>
 
