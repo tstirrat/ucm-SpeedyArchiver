@@ -46,7 +46,6 @@ SpeedyArchiver htmlIncludeOrString
 <@dynamichtml setup_archive_jobs_table_row@>
 	<$exec setValue("RowData", "name", "<$ aArchiveName $>")$>
 	<$exec setValue("RowData", "status", "<$ include speedy_archive_status $>")$>
-	<!-- exec setValue("RowData", "upload", "<$ include speedy_archive_upload_form $>")-->
 	<$exec setValue("RowData", "actions", "<$ include speedy_archive_action_links $>")$>
 <@end@>
 
@@ -98,16 +97,6 @@ SpeedyArchiver htmlIncludeOrString
 	</div>
 <@end@>
 
-<@dynamichtml speedy_archive_upload_form@>
-	<form enctype="multipart/form-data" method="POST" action="<$HttpRelativeWebRoot$>idcplg">
-		<input type="hidden" name="IdcService" value="SPEEDY_ARCHIVER_UPLOAD" />
-		<input type="hidden" name="RedirectUrl" value="" />
-		<input type="hidden" name="archiveName" value="<$ aArchiveName $>" />
-		<input type="file" name="zipArchive" />
-		<input type="submit" name="uploadButton" value="Upload" />
-	</form>
-<@end@>
-
 <@dynamichtml setup_archive_jobs_table_header@>
 	<$UseRowHighlighting = 1$>
 	<$exec rsCreateResultSet("ColumnProperties", "id,width,headerLabel,rowAlign")$>
@@ -123,17 +112,9 @@ SpeedyArchiver htmlIncludeOrString
 	<$exec setValue("ColumnProperties", "headerLabel", "wwStatus")$>
 	<$exec setValue("ColumnProperties", "rowAlign", "left")$>
 	
-	<--
-	<exec rsAppendNewRow("ColumnProperties")>
-	<exec setValue("ColumnProperties", "id", "upload")>
-	<exec setValue("ColumnProperties", "width", "325px")>
-	<exec setValue("ColumnProperties", "headerLabel", "Upload")>
-	<exec setValue("ColumnProperties", "rowAlign", "left")>
-	-->
-	
 	<$exec rsAppendNewRow("ColumnProperties")$>
 	<$exec setValue("ColumnProperties", "id", "actions")$>
-	<$exec setValue("ColumnProperties", "width", "280px")$>
+	<$exec setValue("ColumnProperties", "width", "310px")$>
 	<$exec setValue("ColumnProperties", "headerLabel", "wwActions")$>
 	<$exec setValue("ColumnProperties", "rowAlign", "center")$>
 	

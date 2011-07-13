@@ -203,6 +203,7 @@ public class SpeedyArchiverServiceHandler extends ServiceHandler{
 	 * Therefore speeding up the process of deploying from one environment to another
 	 * 
 	 */
+	@SuppressWarnings("rawtypes")
 	public void uploadArchive() throws ServiceException, DataException{
 		SystemUtils.trace("system", "SpeedyArchiverServiceHandler: uploading archive");
 		
@@ -294,11 +295,12 @@ public class SpeedyArchiverServiceHandler extends ServiceHandler{
                         break;
                 }*/
                 
-                if(directory  != null || !directory.equalsIgnoreCase("")){
+                if(directory != null && !directory.equalsIgnoreCase(""))
+                {
                 	System.out.println("creating a directory structure: " + directory);
-                	try{
+                	try {
                 		new File(archiveFolderPath+directory).mkdirs();
-                	}catch(Exception e){
+                	} catch(Exception e) {
                 		System.err.println("Error: " + e.getMessage());
                 	}
                 }

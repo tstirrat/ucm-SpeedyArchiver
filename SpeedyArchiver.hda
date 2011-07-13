@@ -1,6 +1,6 @@
-﻿<?hda version="10.1.3.3.2 (071031)" jcharset=UTF8 encoding=utf-8?>
+﻿<?hda version="10.1.3.5.1 (110524)" jcharset=UTF8 encoding=utf-8?>
 @Properties LocalData
-version=2010_12_08(build 1)
+version=1.04
 classpath=$COMPONENT_DIR/classes;$COMPONENT_DIR/lib/commons-io-2.0.jar;
 blFieldTypes=
 ComponentName=SpeedyArchiver
@@ -29,6 +29,10 @@ resource
 resources/speedyarchiver_idoc_resource.htm
 null
 10
+resource
+resources/speedyarchiver_publish.htm
+null
+10
 @end
 @ResultSet Filters
 4
@@ -50,6 +54,10 @@ null
 SpeedyArchiver_Templates
 IntradocTemplates
 name
+10
+SpeedyArchiver_PublishedStaticFiles
+PublishedStaticFiles
+srcPath
 10
 @end
 @ResultSet ClassAliases

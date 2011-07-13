@@ -1,4 +1,4 @@
-﻿<?hda version="10.1.3.3.2 (071031)" jcharset=UTF8 encoding=utf-8?>
+﻿<?hda version="10.1.3.5.1 (110524)" jcharset=UTF8 encoding=utf-8?>
 @Properties LocalData
 CreateDate=7/3/11 9:33 PM
 blFieldTypes=CreateDate date
@@ -15,9 +15,9 @@ componentClasses
 SpeedyArchiver/classes/
 componentLib
 SpeedyArchiver/lib/
-weblayout
-SpeedyArchiver/
 componentExtra
 SpeedyArchiver/readme/
+componentExtra
+SpeedyArchiver/speedy/
 @end
 
