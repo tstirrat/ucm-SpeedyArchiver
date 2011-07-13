@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="classes"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.0.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="C:/Vedran&apos;s Documents/TEAM Informatics/Goodies/START CS IN DEBUG MODE/idcserver.jar"/>
-	<classpathentry kind="output" path="classes"/>
-</classpath>
