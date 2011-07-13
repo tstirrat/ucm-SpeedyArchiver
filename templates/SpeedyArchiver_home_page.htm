@@ -121,16 +121,17 @@
 			
 			$('#edit-query-dialog span.archive-name').text(archiveName);
 			$('#edit-archivedata-form input.archive-name').val(archiveName);
-			
+			$('#edit-query-form').show();
+			$('#edit-query-wait').hide();
 			
 			$('#edit-query-dialog').dialog('open');
 			
 			// hide the form until the config has been retrieved
 			//$('#edit-query-form').hide();
-			$('#edit-query-form textarea,#edit-query-form input').attr('disabled', 'disabled');
+			$('#edit-query-form textarea, #edit-query-form input').attr('disabled', 'disabled');
 			
-			$('#CustomQuery').text('Loading export query for ' + archiveName);
-			$('#edit-query-wait').hide();
+			$('#CustomQuery').val('Loading export query for ' + archiveName);
+			
 			
 			// GET_ARCHIVES
 			$.ajax({
@@ -147,14 +148,13 @@
 						// show the form
 						//$('#edit-query-form').show();
 						//$('#edit-query-wait').hide();
-						$('#edit-query-form textarea,#edit-query-form input').removeAttr('disabled');
+						$('#edit-query-form textarea, #edit-query-form input').removeAttr('disabled');
 					}
 					else
 					{
 						$('#edit-query-wait').text('Error reading export query for ' + archiveName);
 						$('#edit-query-wait').show();
 						$('#edit-query-form').hide();
-						
 					}
 					
 				},
