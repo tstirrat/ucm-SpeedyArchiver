@@ -419,7 +419,7 @@
 		
 		//upload ajax dialog
 		$("a[name='uploadArchive']").each(function (index, elem) {
-			var archiveName = $(elem).attr('id');
+			var archiveName = $(elem).closest('div').attr('id');
 			
 			var uploader = new AjaxUpload($(this), {
 				action : '<$HttpRelativeWebRoot$>idcplg',
