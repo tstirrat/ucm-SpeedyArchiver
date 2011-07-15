@@ -290,7 +290,15 @@
 		var unescapeExportQuery = function(QueryText) {
 			//console.log(QueryText);
 			
-			QueryText = QueryText.replace(/(\\r|[^\\])\\n/g, "\n");
+			// doesnt suport look behind :/ or this would work: (?<!\\)(\\r)?\\n/g
+			
+			// so this hack will work *sigh*
+			QueryText = QueryText.replace(/\\\\/g, "!!");
+			
+			QueryText = QueryText.replace(/(\\r)?\\n/g, "\n");
+			
+			QueryText = QueryText.replace(/!!/g, "\\");
+			
 			QueryText = QueryText.replace(/\\\\/g, "\\");
 			QueryText = QueryText.replace(/%/g, " ");
 			QueryText = QueryText.replace(/# /g, "%");

@@ -1,6 +1,6 @@
 ﻿<?hda version="10.1.3.5.1 (110524)" jcharset=UTF8 encoding=utf-8?>
 @Properties LocalData
-version=1.05
+version=1.06
 classpath=$COMPONENT_DIR/classes;$COMPONENT_DIR/lib/commons-io-2.0.jar;
 blFieldTypes=
 ComponentName=SpeedyArchiver
