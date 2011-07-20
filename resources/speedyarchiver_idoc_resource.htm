@@ -59,36 +59,17 @@ SpeedyArchiver htmlIncludeOrString
 
 <@dynamichtml speedy_archive_action_links@>
 	<div id="<$ aArchiveName $>" class="actions">
-		[<a class="xuiLinkText2_Sm" href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>">Download</a>]
+		[<a rel="<$ ArchiveData.aArchiveName $>" class="download-action xuiLinkText2_Sm" href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>">Download</a>]
 		
-		[<a class="xuiLinkText2_Sm" name="uploadArchive" rel="<$ ArchiveData.aArchiveName $>" href="#">Upload</a>]
+		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="upload-action xuiLinkText2_Sm" href="#">Upload</a>]
 						
 		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="edit-query xuiLinkText2_Sm">Edit Query</a>]
 	
 		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="export-action xuiLinkText2_Sm">Export</a>]
 	
 		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="import-action xuiLinkText2_Sm">Import</a>]
-							
-		<!-- EXPORT FORM -->
-		<form class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
-			<input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
-			<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
-			<input type="hidden" name="dataSource" value="RevisionIDs" />
-			<input type="hidden" name="RedirectUrl" value="" />
-			<input type="hidden" name="IsJson" value="1" />
-			<input type="hidden" name="aArchiveName" value="<$ aArchiveName $>" />
-			<input type="hidden" name="aDoDelete" value="0" />
-		</form>
 		
-		<!-- IMPORT FORM -->
-		<form class="hide import" method="post" action="<$ HttpRelativeWebRoot $>idcplg">
-			<input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
-			<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
-			<input type="hidden" name="RedirectUrl" value="" />
-			<input type="hidden" name="IsJson" value="1" />
-			<input type="hidden" name="aArchiveName" value="<$ aArchiveName $>" />
-			<input type="hidden" name="aImportDocuments" value="true" />
-		</form>
+		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="batch-action xuiLinkText2_Sm">View Batches</a>]
 		
 		<!-- config -->
 		<form class="hide">
@@ -114,7 +95,7 @@ SpeedyArchiver htmlIncludeOrString
 	
 	<$exec rsAppendNewRow("ColumnProperties")$>
 	<$exec setValue("ColumnProperties", "id", "actions")$>
-	<$exec setValue("ColumnProperties", "width", "310px")$>
+	<$exec setValue("ColumnProperties", "width", "380px")$>
 	<$exec setValue("ColumnProperties", "headerLabel", "wwActions")$>
 	<$exec setValue("ColumnProperties", "rowAlign", "center")$>
 	

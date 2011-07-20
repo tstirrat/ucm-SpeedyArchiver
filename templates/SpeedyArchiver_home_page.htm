@@ -35,6 +35,43 @@
 			margin: auto;
 			width: 130px;
 		}
+		
+		#dialog-view-batches {
+			position: relative;
+		}
+		#dialog-view-batches-status {
+			
+		}
+		#dialog-view-batches .container {
+			overflow: auto;
+		}
+		#dialog-view-batches table {
+			width: 100%;
+		}
+		#dialog-view-batches table th {
+			text-align: left;
+		}
+		#dialog-view-batches table td {
+			cursor: default;
+		}
+		#dialog-view-batches table .ui-selected {
+			background: url("<$HttpWebRoot$>resources/speedy/ui/css/redmond/images/ui-bg_gloss-wave_55_5c9ccc_500x100.png") 50% 50% repeat-x #5C9CCC;
+			color: white;
+		}
+		#dialog-view-batches table .ui-selected td {
+			color: white;
+		}
+		#dialog-view-batches table .ui-selecting {
+			background: #FECA40;
+		}
+		#dialog-view-batches-status {
+			height: 90px;
+			width: 100%;
+			overflow: auto;
+			position: absolute;
+			bottom: 0px;
+			left: 0;
+		}
 	</style>
 </head>
 
@@ -173,13 +210,18 @@
 		$('.actions a.import-action').click(function(e) {
 			e.preventDefault();
 			
-			var $this = $(this);
+			var archiveName = $(this).attr('rel');
 			
-			var statusArea = $this.closest('tr').find('.status');
+			$('#form-import-archive').find('input[name=aArchiveName]').val(archiveName);
 			
-			var archiveName = $this.attr('rel');
+			importArchive();
 			
-			var form = $this.closest('div').find('form.import');
+		});
+		
+		var importArchive = function(archiveName) {
+			var form = $('#form-import-archive');
+			
+			var statusArea = $('#' + archiveName).closest('tr').find('.status');
 			
 			statusArea.text('Requesting import...');
 			
@@ -196,18 +238,142 @@
 				dataType: 'json'
 			});
 			
-		});
+		};
 		
 		$('.actions a.export-action').click(function(e) {
+			var archiveName = $(this).attr('rel');
+			
+			//populate forms
+			$('#form-get-batchfiles').find('input[name=aArchiveName]').val(archiveName);
+			$('#form-delete-batch').find('input[name=aArchiveName]').val(archiveName);
+			$('#form-export-archive').find('input[name=aArchiveName]').val(archiveName);
+			
+			$("#dialog-export").dialog('widget').find("button:contains('OK') .ui-button-text").text('Cancel');
+			$("#dialog-export").dialog('widget').find("button:contains('Export')").removeAttr('disabled').removeClass('ui-state-disabled').show();
+			
+			$('#dialog-export').dialog('open');
 			e.preventDefault();
+		});
+		
+		$('.actions a.batch-action').click(function(e) {
+			var archiveName = $(this).attr('rel');
 			
-			var $this = $(this);
+			//populate forms
+			$('#form-get-batchfiles').find('input[name=aArchiveName]').val(archiveName);
+			$('#form-delete-batch').find('input[name=aArchiveName]').val(archiveName);
+			$('#form-import-batch').find('input[name=aArchiveName]').val(archiveName);
 			
-			var statusArea = $this.closest('tr').find('.status');
+			$('#dialog-view-batches').dialog('open');
 			
-			var archiveName = $this.attr('rel');
+			var form = $('#form-get-batchfiles');
 			
-			var form = $this.closest('div').find('form.export');
+			$.ajax({
+				type: 'POST',
+				url: form.attr('action'),
+				data: form.serialize(),
+				success: function(data, textStatus) {
+					$('#dialog-view-batches-list').children().remove();
+					
+					if (data.ResultSets.BatchFiles.rows != null)
+					{
+						var BatchFiles = data.ResultSets.BatchFiles.rows;
+						
+						for (var i = 0; i < BatchFiles.length; i++)
+						{
+							
+							
+							var trimmedName = BatchFiles[i][0];
+							trimmedName = trimmedName.substring(0, trimmedName.indexOf("/"));
+							
+							var name = $(document.createElement('td')).text(trimmedName);
+							var count = $(document.createElement('td')).text(BatchFiles[i][3]);
+							var state = $(document.createElement('td')).text(BatchFiles[i][1]);
+							
+							$(document.createElement('tr'))
+								.data('filepath', BatchFiles[i][0])
+								.append(name)
+								.append(count)
+								.append(state)
+								.appendTo('#dialog-view-batches-list');
+						}
+					}
+				},
+				dataType: 'json'
+			});
+			
+			e.preventDefault();
+		});
+		
+		/**
+		 * Exports the archive. forms are prepopulated.
+		 */
+		var exportArchive = function() {
+			
+			var statusArea = $('#dialog-export-status');
+			
+			var form = $('#form-get-batchfiles');
+			
+			// disable export button
+			$("#dialog-export").dialog('widget').find("button:contains('Export')").attr('disabled', 'disabled').addClass('ui-state-disabled');
+			
+			// clear old batch files?
+			if ($('#delete-old-archives').is(':checked'))
+			{
+				statusArea.text('Enumerating batch files...');
+				
+				var BatchFiles;
+				
+				$.ajax({
+					async: false,
+					type: 'POST',
+					url: form.attr('action'),
+					data: form.serialize(),
+					success: function(data, textStatus) {
+						if (data.ResultSets.BatchFiles.rows != null)
+						{
+							BatchFiles = data.ResultSets.BatchFiles.rows;
+						}
+					},
+					dataType: 'json'
+				});
+				
+				// remove each batch file if any
+				if (BatchFiles != null)
+				{
+					if (BatchFiles.length > 0)
+					{
+						var errorCount = 0;
+						var successCount = 0;
+						
+						statusArea.text('Removing old batch files...');
+						
+						form = $('#form-delete-batch');
+						
+						for (var i = 0; i < BatchFiles.length; i++)
+						{
+							form.find('input[name=aBatchFile]').val(BatchFiles[i][0]);
+							
+							$.ajax({
+								async: false,
+								type: 'POST',
+								url: form.attr('action'),
+								data: form.serialize(),
+								success: function(data, textStatus) {
+									successCount++;
+								},
+								error: function(data) {
+									errorCount++;
+								},
+								dataType: 'json'
+							});
+						}
+					}
+				}
+			}
+			
+			statusArea.text('Exporting...');
+			
+			form = $('#form-export-archive');
 			
 			statusArea.text('Requesting export...');
 			
@@ -216,14 +382,17 @@
 				url: form.attr('action'),
 				data: form.serialize(),
 				success: function(data, textStatus) {
-					statusArea.text('Export for archive "' + archiveName + '" started');
+					statusArea.text('Export started. You may close the dialog.');
+					
+					$("#dialog-export").dialog('widget').find("button:contains('Export')").hide();
+					$("#dialog-export").dialog('widget').find("button:contains('Cancel') .ui-button-text").text('OK');
 				},
 				error: function(data) {
 					statusArea.html('<span class="xuiError">There was a problem executing the export</span>');
 				},
 				dataType: 'json'
 			});
-		});
+		};
 		
 		/**
 		 * Turns the visual form into a the archivedata parameter aExportQuery
@@ -426,8 +595,10 @@
 		
 		
 		//upload ajax dialog
-		$("a[name='uploadArchive']").each(function (index, elem) {
+		$(".actions a.upload-action").each(function (index, elem) {
 			var archiveName = $(elem).closest('div').attr('id');
+			
+			
 			
 			var uploader = new AjaxUpload($(this), {
 				action : '<$HttpRelativeWebRoot$>idcplg',
@@ -439,7 +610,7 @@
 					file: 'zipArchive'
 				},
 				onSubmit : function(file, ext) {
-					
+					$('#form-import-archive').find('input[name=aArchiveName]').val(archiveName);
 				},
 				onChange : function(file, ext) {
 					$('#dialog-upload-info .message').text('Please wait while your file uploads');
@@ -481,6 +652,10 @@
 	   			hide: 'fade',
 	   			closeOnEscape: false,
 	   			buttons: {
+	   				"Yes": function () {
+						importArchive();
+						$(this).dialog('close');
+					},
 					"OK": function () {
 						$(this).dialog('close');
 					}
@@ -506,69 +681,263 @@
 				}
 			});
 			
+			$('#dialog-export').dialog({ 
+				modal: true,
+				width: 480,
+				autoOpen: false,
+				show: 'fade',
+				hide: 'fade',
+				buttons: {
+					"Export": function () {
+						exportArchive();
+						//$(this).dialog('close');
+					},
+					"Cancel": function () {
+						$(this).dialog('close');
+					}
+				}
+			});
+			
+			$('#dialog-view-batches').dialog({ 
+				modal: true,
+				width: 400,
+				height: 400,
+				autoOpen: false,
+				show: 'fade',
+				hide: 'fade',
+				buttons: {
+					"Import": function () {
+						var batches = $('#dialog-view-batches-selected').data('selected');
+						
+						var form = $('#form-import-batch');
+						
+						for (var i = 0; i < batches.length; i++)
+						{
+							form.find('input[name=aBatchFile]').val(batches[i]);
+							
+							$.ajax({
+								async: false,
+								type: 'POST',
+								url: form.attr('action'),
+								data: form.serialize(),
+								success: function(data, textStatus) {
+									if (data.LocalData.StatusCode && data.LocalData.StatusCode != '')
+									{
+										$('#dialog-view-batches-status').append('<br />error importing batch: ' + batches[i]);
+										$('#dialog-view-batches-status').append(data.LocalData.StatusMessage);
+									}
+									else
+									{
+										$('#dialog-view-batches-status').append('<br />imported batch: ' + batches[i]);
+									}
+									$('#dialog-view-batches-status').scrollTop($('#dialog-view-batches-status')[0].scrollHeight);
+								},
+								error: function(data) {
+									alert('error');
+								},
+								dataType: 'json'
+							});
+						}
+					},
+					"Delete": function () {
+						var batches = $('#dialog-view-batches-selected').data('selected');
+						
+						var form = $('#form-delete-batch');
+						
+						for (var i = 0; i < batches.length; i++)
+						{
+							form.find('input[name=aBatchFile]').val(batches[i]);
+							
+							$.ajax({
+								async: false,
+								type: 'POST',
+								url: form.attr('action'),
+								data: form.serialize(),
+								success: function(data, textStatus) {
+									$('#dialog-view-batches-list tr').each(function(i, ele) {
+										if ($(ele).data('filepath') == data.LocalData.aBatchFile) {
+											$(ele).remove();
+											$('#dialog-view-batches-status').append('<br />deleted batch: ' + batches[i]);
+											$('#dialog-view-batches-status').scrollTop($('#dialog-view-batches-status')[0].scrollHeight);
+										}
+									});
+								},
+								error: function(data) {
+									alert('error');
+								},
+								dataType: 'json'
+							});
+						}
+					}
+				}
+			});
+			
+			$('#dialog-view-batches-list').selectable({
+				filter: "tr",
+				stop: function() {
+					var result = [];
+					$( ".ui-selected", this ).each(function() {
+						result.push($(this).data('filepath'));
+					});
+					
+					$('#dialog-view-batches-selected').data('selected', result);
+				}
+			});
+			
+			$('#dialog-view-batches-list td').click(function() {
+				$(this).closest('tr').toggleClass('ui-selected');
+			});
+			
 		});
 		
 	}); // document.ready()
 </script>
 	
-	<!-- DIALOG BOX -->
+	<!-- upload dialog -->
 	<div id="dialog-upload-info" class="hide dialog" title="Uploading">
 		<div class="message"></div>
 	 	<div class="loading"></div>
 	</div>
 	
-	<!-- Edit query dialog -->
-<div id="edit-query-dialog" class="hide dialog" title="Edit Query Options">
-	<form id="edit-query-form">
-		<input type="hidden" id="edit-query-form-valid" value="0" />
-		<div class="group">
-			<div>
-				<!-- div>
-					<input type="checkbox" id="IsCustom" name="IsCustom" />
-					<label for="IsCustom">Custom Query Expression</label>
-				</div -->
-				<textarea id="CustomQuery" rows="5" cols="75">dSecurityGroup = 'Public' AND dDocName LIKE 'D%'</textarea>
-			</div>
-			
-			<div>
-				<h2>Query Options</h2>
-				<div>
-					<input type="checkbox" id="UseExportDate" name="UseExportDate" value="1" checked="checked" />
-					<label for="UseExportDate">Export Revisions with Release Date later than most recent Export Date</label>
-				</div>
-				<div>
-					<input type="checkbox" id="AllowExportPublished" name="AllowExportPublished" value="1" />
-					<label for="AllowExportPublished">Allow export of Published Revisions</label>
-				</div>
-				<input type="radio" id="AllRevisions" name="RevisionType" value="AllRevisions" />
-				<label for="AllRevisions">All Selected Revisions</label>
-				
-				<input type="radio" id="LatestRevisions" name="RevisionType" value="LatestRevisions" checked="checked" />
-				<label for="LatestRevisions">Latest Revisions</label>
-				
-				<input type="radio" id="NotLatestRevisions" name="RevisionType" value="NotLatestRevisions" />
-				<label for="NotLatestRevisions">Not Latest Revisions</label>
-				
-				<input type="radio" id="MostRecentMatching" name="RevisionType" value="MostRecentMatching" />
-				<label for="MostRecentMatching">Single Revision Replication</label>
-			</div>
-		</div>
-	</form>
-	<div id="edit-query-wait">
-		Loading query details for <span class="archive-name">Archive name</span>, please wait...
+	<!-- Export query dialog -->
+	<div id="dialog-export" class="hide dialog" title="Export">
+		<input id="delete-old-archives" type="checkbox" value="yes" checked="checked" /><label for="delete-old-archives">Clear all batch files before exporting</label><br />
+		<input id="delete-content" type="checkbox" value="yes" /><label for="delete-content">Delete exported content</label>
+		<div id="dialog-export-status" class="status"></div>
 	</div>
 	
-	<!-- EDIT_ARCHIVEDATA form -->
-	<form class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post" id="edit-archivedata-form">
-		<input type="hidden" name="IdcService" value="EDIT_ARCHIVEDATA" />
+	<!-- View batchfiles dialog -->
+	<div id="dialog-view-batches" class="hide dialog" title="Batch files">
+		<input type="hidden" id="dialog-view-batches-selected" />
+		<div class="container">
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Items</th>
+						<th>State</th>
+					</tr>
+				</thead>
+				
+				<tbody id="dialog-view-batches-list">
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div id="dialog-view-batches-status" class="status"></div>
+	</div>
+	
+	<!-- Edit query dialog -->
+	<div id="edit-query-dialog" class="hide dialog" title="Edit Query Options">
+		<form id="edit-query-form">
+			<input type="hidden" id="edit-query-form-valid" value="0" />
+			<div class="group">
+				<div>
+					<!-- div>
+						<input type="checkbox" id="IsCustom" name="IsCustom" />
+						<label for="IsCustom">Custom Query Expression</label>
+					</div -->
+					<textarea id="CustomQuery" rows="5" cols="75">dSecurityGroup = 'Public' AND dDocName LIKE 'D%'</textarea>
+				</div>
+				
+				<div>
+					<h2>Query Options</h2>
+					<div>
+						<input type="checkbox" id="UseExportDate" name="UseExportDate" value="1" checked="checked" />
+						<label for="UseExportDate">Export Revisions with Release Date later than most recent Export Date</label>
+					</div>
+					<div>
+						<input type="checkbox" id="AllowExportPublished" name="AllowExportPublished" value="1" />
+						<label for="AllowExportPublished">Allow export of Published Revisions</label>
+					</div>
+					<input type="radio" id="AllRevisions" name="RevisionType" value="AllRevisions" />
+					<label for="AllRevisions">All Selected Revisions</label>
+					
+					<input type="radio" id="LatestRevisions" name="RevisionType" value="LatestRevisions" checked="checked" />
+					<label for="LatestRevisions">Latest Revisions</label>
+					
+					<input type="radio" id="NotLatestRevisions" name="RevisionType" value="NotLatestRevisions" />
+					<label for="NotLatestRevisions">Not Latest Revisions</label>
+					
+					<input type="radio" id="MostRecentMatching" name="RevisionType" value="MostRecentMatching" />
+					<label for="MostRecentMatching">Single Revision Replication</label>
+				</div>
+			</div>
+		</form>
+		<div id="edit-query-wait">
+			Loading query details for <span class="archive-name">Archive name</span>, please wait...
+		</div>
+		
+		<!-- EDIT_ARCHIVEDATA form -->
+		<form class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post" id="edit-archivedata-form">
+			<input type="hidden" name="IdcService" value="EDIT_ARCHIVEDATA" />
+			<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+			<input type="hidden" name="EditItems" value="aExportQuery" />
+			<input type="hidden" class="archive-name" name="aArchiveName" value="" />
+			<input type="hidden" name="IsJson" value="1" />
+			
+			<input type="hidden" id="aExportQuery" name="aExportQuery" />
+		</form>
+	</div>
+	
+	<!-- EXPORT_ARCHIVE -->
+	<form id="form-export-archive" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+		<input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
-		<input type="hidden" name="EditItems" value="aExportQuery" />
-		<input type="hidden" class="archive-name" name="aArchiveName" value="" />
+		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
 		
-		<input type="hidden" id="aExportQuery" name="aExportQuery" />
+		<input type="hidden" name="dataSource" value="RevisionIDs" />
+		<input type="hidden" name="aArchiveName" value="" />
+		<input type="hidden" name="aDoDelete" value="0" />
 	</form>
-</div>
+	
+	<!-- GET_BATCHFILES FORM -->
+	<form id="form-get-batchfiles" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+		<input type="hidden" name="IdcService" value="GET_BATCHFILES" />
+		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+		<input type="hidden" name="RedirectUrl" value="" />
+		<input type="hidden" name="IsJson" value="1" />
+		
+		<input type="hidden" name="aArchiveName" value="" />
+	</form>
+	
+	<!-- DELETE_BATCH_FILE FORM -->
+	<form id="form-delete-batch" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+		<input type="hidden" name="IdcService" value="DELETE_BATCH_FILE" />
+		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+		<input type="hidden" name="RedirectUrl" value="" />
+		<input type="hidden" name="IsJson" value="1" />
+		
+		<input type="hidden" name="aArchiveName" value="" />
+		<input type="hidden" name="aBatchFile" value="" />
+	</form>
+	
+	<!-- IMPORT_BATCH_FILE FORM -->
+	<form id="form-import-batch" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+		<input type="hidden" name="IdcService" value="IMPORT_BATCHFILE" />
+		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+		<input type="hidden" name="RedirectUrl" value="" />
+		<input type="hidden" name="IsJson" value="1" />
+		
+		<input type="hidden" name="aArchiveName" value="" />
+		<input type="hidden" name="aBatchFile" value="" />
+	</form>
+	
+	<!-- IMPORT_ARCHIVE FORM -->
+	<form id="form-import-archive" class="hide import" method="post" action="<$ HttpRelativeWebRoot $>idcplg">
+		<input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
+		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+		<input type="hidden" name="RedirectUrl" value="" />
+		<input type="hidden" name="IsJson" value="1" />
+		
+		<input type="hidden" name="aArchiveName" value="" />
+		<input type="hidden" name="aImportDocuments" value="true" />
+	</form>
 
 
 	<$include std_page_end$>
