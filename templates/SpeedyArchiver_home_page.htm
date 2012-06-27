@@ -165,7 +165,7 @@
 			
 			// hide the form until the config has been retrieved
 			//$('#edit-query-form').hide();
-			$('#edit-query-form textarea, #edit-query-form input').attr('disabled', 'disabled');
+			//$('#edit-query-form textarea, #edit-query-form input').attr('disabled', 'disabled');
 			
 			$('#CustomQuery').val('Loading export query for ' + archiveName);
 			
@@ -185,7 +185,7 @@
 						// show the form
 						//$('#edit-query-form').show();
 						//$('#edit-query-wait').hide();
-						$('#edit-query-form textarea, #edit-query-form input').removeAttr('disabled');
+						//$('#edit-query-form textarea, #edit-query-form input').removeAttr('disabled');
 					}
 					else
 					{
@@ -615,7 +615,8 @@
 				onChange : function(file, ext) {
 					$('#dialog-upload-info .message').text('Please wait while your file uploads');
 					$('#dialog-upload-info .loading').show();
-					// disable OK button
+					
+					// disable buttons
 					$("#dialog-upload-info").dialog('widget').find("button").attr('disabled', 'disabled').addClass('ui-state-disabled');
 					$('#dialog-upload-info').dialog('open');
 					
@@ -636,8 +637,9 @@
 						$('#dialog-upload-info .message').text('Error during upload!');
 					}
 					
-					// enable OK button
+					// enable all buttons
 					$("#dialog-upload-info").dialog('widget').find("button").removeAttr("disabled").removeClass('ui-state-disabled');
+					$("#dialog-upload-info").dialog('widget').find("button:contains(OK) .ui-button-text").text('Close');
 				}
 			});
 			
@@ -651,8 +653,11 @@
 	   			show: 'fade',
 	   			hide: 'fade',
 	   			closeOnEscape: false,
+	   			open: function() {
+	   				$("#dialog-upload-info").dialog('widget').find("button:contains(Close) .ui-button-text").text('OK');
+	   			},
 	   			buttons: {
-	   				"Yes": function () {
+	   				"Import": function () {
 						importArchive();
 						$(this).dialog('close');
 					},
@@ -801,7 +806,7 @@
 	
 	<!-- Export query dialog -->
 	<div id="dialog-export" class="hide dialog" title="Export">
-		<input id="delete-old-archives" type="checkbox" value="yes" checked="checked" /><label for="delete-old-archives">Clear all batch files before exporting</label><br />
+		<input id="delete-old-archives" type="checkbox" value="yes" /><label for="delete-old-archives">Clear all batch files before exporting</label><br />
 		<input id="delete-content" type="checkbox" value="yes" /><label for="delete-content">Delete exported content</label>
 		<div id="dialog-export-status" class="status"></div>
 	</div>
@@ -937,6 +942,7 @@
 		
 		<input type="hidden" name="aArchiveName" value="" />
 		<input type="hidden" name="aImportDocuments" value="true" />
+		<input type="hidden" name="aImportDocConfig" value="false" />
 	</form>
 
 

@@ -1,2 +1,7 @@
-
 .classpath
+/lib/*
+/SpeedyArchiver.zip
+manifest.zip
+target
+._*
+.DS*

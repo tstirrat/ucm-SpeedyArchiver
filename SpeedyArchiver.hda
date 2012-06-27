@@ -1,11 +1,12 @@
-﻿<?hda version="10.1.3.5.1 (110524)" jcharset=UTF8 encoding=utf-8?>
+﻿<?hda version="11gR1-11.1.1.6.0-idcprod1-111219T111403" jcharset="UTF8" encoding="utf-8"?>
 @Properties LocalData
-version=1.07
-classpath=$COMPONENT_DIR/classes;$COMPONENT_DIR/lib/commons-io-2.0.jar;
-blFieldTypes=
 ComponentName=SpeedyArchiver
-hasPreferenceData=false
 blDateFormat=M/d/yy {h:mm[:ss] {aa}[zzz]}!mAM,PM!tAustralia/Sydney
+blFieldTypes=
+classpath=$COMPONENT_DIR/lib/speedy-archiver-1.0-SNAPSHOT.jar;$COMPONENT_DIR/lib/commons-io-2.1.jar;$COMPONENT_DIR/lib/ucm-annotations-0.1-SNAPSHOT.jar;$COMPONENT_DIR/lib/commons-lang-2.6.jar;$COMPONENT_DIR/lib/javassist-3.12.1.GA.jar;$COMPONENT_DIR/lib/log4j-1.2.14.jar;$COMPONENT_DIR/lib/slf4j-api-1.5.10.jar;$COMPONENT_DIR/lib/slf4j-log4j12-1.5.10.jar
+hasPreferenceData=0
+preventAdditionalComponentDowngrade=0
+version=1.0-SNAPSHOT
 @end
 @ResultSet ResourceDefinition
 4
@@ -13,14 +14,6 @@ type
 filename
 tables
 loadOrder
-service
-resources/speedyarchiver_service.htm
-SpeedyArchiver_Services
-10
-resource
-resources/speedyarchiver_resource.htm
-null
-10
 template
 templates/speedyarchiver_template.hda
 null
@@ -40,6 +33,10 @@ type
 location
 parameter
 loadOrder
+extraAfterConfigInit
+org.stirrat.twine.Bootstrapper
+speedyarchiver.properties
+1000
 @end
 @ResultSet MergeRules
 4
@@ -47,10 +44,6 @@ fromTable
 toTable
 column
 loadOrder
-SpeedyArchiver_ServiceHandlers
-ServiceHandlers
-null
-10
 SpeedyArchiver_Templates
 IntradocTemplates
 name
@@ -66,4 +59,3 @@ classname
 location
 loadOrder
 @end
-
