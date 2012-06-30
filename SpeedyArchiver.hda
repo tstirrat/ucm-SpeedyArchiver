@@ -3,7 +3,7 @@
 ComponentName=SpeedyArchiver
 blDateFormat=M/d/yy {h:mm[:ss] {aa}[zzz]}!mAM,PM!tAustralia/Sydney
 blFieldTypes=
-classpath=$COMPONENT_DIR/lib/speedy-archiver-1.0-SNAPSHOT.jar;$COMPONENT_DIR/lib/commons-io-2.1.jar;$COMPONENT_DIR/lib/ucm-annotations-0.1-SNAPSHOT.jar;$COMPONENT_DIR/lib/commons-lang-2.6.jar;$COMPONENT_DIR/lib/javassist-3.12.1.GA.jar;$COMPONENT_DIR/lib/log4j-1.2.14.jar;$COMPONENT_DIR/lib/slf4j-api-1.5.10.jar;$COMPONENT_DIR/lib/slf4j-log4j12-1.5.10.jar
+classpath=$COMPONENT_DIR/lib/speedy-archiver-1.0-SNAPSHOT.jar;$COMPONENT_DIR/lib/commons-io-2.1.jar;$COMPONENT_DIR/lib/ucm-twine-0.9.0.jar;$COMPONENT_DIR/lib/commons-lang-2.6.jar;$COMPONENT_DIR/lib/javassist-3.12.1.GA.jar;$COMPONENT_DIR/lib/log4j-1.2.14.jar;$COMPONENT_DIR/lib/slf4j-api-1.5.10.jar;$COMPONENT_DIR/lib/slf4j-log4j12-1.5.10.jar
 hasPreferenceData=0
 preventAdditionalComponentDowngrade=0
 version=1.0-SNAPSHOT
@@ -34,7 +34,7 @@ location
 parameter
 loadOrder
 extraAfterConfigInit
-org.stirrat.twine.Bootstrapper
+org.ucmtwine.Bootstrapper
 speedyarchiver.properties
 1000
 @end

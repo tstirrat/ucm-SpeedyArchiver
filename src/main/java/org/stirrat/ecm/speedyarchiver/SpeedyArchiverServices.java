@@ -24,15 +24,14 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.stirrat.twine.annotation.Binder;
-import org.stirrat.twine.annotation.ServiceMethod;
-import org.stirrat.twine.proxy.ServiceProxy;
+import org.ucmtwine.annotation.Binder;
+import org.ucmtwine.annotation.ServiceMethod;
 
 /**
  * Speed up your transfer of archives from one environment to another by using
  * the OOTB pages and services defined below
  */
-public class SpeedyArchiverServices extends ServiceProxy {
+public class SpeedyArchiverServices {
 
   private static final int READ_BUFFER_SIZE = 1024;
   private static final String FILENAME_DELIMITER = "_";
@@ -69,7 +68,7 @@ public class SpeedyArchiverServices extends ServiceProxy {
     }
 
     try {
-      attachFileToHttpResponse(zipFile, httpImpl);
+      attachFileToHttpResponse(zipFile, httpImpl, binder);
 
     } catch (IOException e) {
       throw new ServiceException("Error reading file " + zipFile.getName());
@@ -252,7 +251,8 @@ public class SpeedyArchiverServices extends ServiceProxy {
    *          The service http object
    * @throws IOException
    */
-  public void attachFileToHttpResponse(File file, HttpImplementor httpImpl) throws ServiceException, IOException {
+  public void attachFileToHttpResponse(File file, HttpImplementor httpImpl, DataBinder binder) throws ServiceException,
+      IOException {
 
     String mimeType = URLConnection.getFileNameMap().getContentTypeFor(file.getName());
 
@@ -269,8 +269,8 @@ public class SpeedyArchiverServices extends ServiceProxy {
       dsw.m_dataType = "attachment";
     }
 
-    m_binder.putLocal("noSaveAs", "true");
-    httpImpl.sendStreamResponse(m_binder, dsw);
+    binder.putLocal("noSaveAs", "true");
+    httpImpl.sendStreamResponse(binder, dsw);
   }
 
   /**
