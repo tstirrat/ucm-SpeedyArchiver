@@ -52,11 +52,11 @@ public class SpeedyArchiverServices {
    * @throws ServiceException
    *           If there is an error reading or accessing the zip file
    */
-  @ServiceMethod(name = "SPEEDY_ARCHIVER_DOWNLOAD")
+  @ServiceMethod(name = "SPEEDY_ARCHIVER_DOWNLOAD", template = "SPEEDY_ARCHIVER_HOME")
   public void downloadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder,
       HttpImplementor httpImpl) throws ServiceException {
 
-    File archiveFolder = getCollectionFolder(archiveName);
+    File archiveFolder = getArchiveBaseFolder(archiveName);
 
     File zipFile = null;
 
@@ -83,7 +83,7 @@ public class SpeedyArchiverServices {
    * @param binder
    *          The service data binder
    */
-  @ServiceMethod(name = "SPEEDY_ARCHIVER_UPLOAD")
+  @ServiceMethod(name = "SPEEDY_ARCHIVER_UPLOAD", template = "SPEEDY_ARCHIVER_HOME")
   public void uploadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder)
       throws ServiceException, DataException {
 
@@ -151,16 +151,20 @@ public class SpeedyArchiverServices {
    * @throws ServiceException
    *           If the job name is invalid.
    */
-  private File getCollectionFolder(String archiveName) throws ServiceException {
-    String archiveFolderPath = getArchiveBaseFolder() + archiveName;
+  private File getArchiveBaseFolder(String archiveName) throws ServiceException {
 
-    boolean exists = (new File(archiveFolderPath)).exists();
+    File archiveFolder = new File(getArchiveBaseFolder() + archiveName);
 
-    if (exists) {
-      return new File(archiveFolderPath);
-    } else {
-      throw new ServiceException("Archive " + archiveName + " does not exist!");
+    if (!archiveFolder.exists()) {
+      // 11g is lower case
+      archiveFolder = new File(getArchiveBaseFolder() + archiveName.toLowerCase());
     }
+
+    if (!archiveFolder.exists()) {
+      throw new ServiceException("Archive folder " + archiveFolder.getAbsolutePath() + " does not exist!");
+    }
+
+    return archiveFolder;
 
   }
 

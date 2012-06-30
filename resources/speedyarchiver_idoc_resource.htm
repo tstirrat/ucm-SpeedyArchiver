@@ -7,6 +7,26 @@ SpeedyArchiver htmlIncludeOrString
 </head>
 <body>
 
+<@dynamicdata CoreMenuItems@>
+id, label, linkType, linkData
+SPEEDY, Speedy Archive, cgi, IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME
+<@end@>
+
+<@dynamicdata CoreMenuItemRelationships@>
+<?commatable mergeKey="primaryKey"?>
+parentId, id, loadOrder
+MENU_B, SPEEDY, 1000
+<@end@>
+
+<@dynamicdata CoreMenuItemsFlags@>
+id, flags
+SPEEDY, isAdmin
+<@end@>
+
+<@dynamicdata CoreMenuItemsImages@>
+id,           image,                imageOpen
+SPEEDY, ScsPageItem.gif,
+<@end@>
 
 <@dynamichtml custom_finish_layout_init@>
 
