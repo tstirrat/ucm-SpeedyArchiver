@@ -2,7 +2,7 @@
 @Properties LocalData
 ComponentName=SpeedyArchiver
 CreateDate=6/16/12 7:10 PM
-blDateFormat=M/d{/yy}{ h:mm[:ss]{ a}}!mAM,PM!tAustralia/NSW
+blDateFormat=M/d{/yy}{ h:mm[:ss]{ a}}!mAM,PM!tAustralia/Sydney
 blFieldTypes=CreateDate date
 @end
 @ResultSet Manifest
