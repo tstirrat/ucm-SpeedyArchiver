@@ -16,6 +16,10 @@
 	<$endif$>
 	<$include query_form_minisearch_script$>
 	
+	<$ if not idcToken $>
+	   <$ idcToken = "" $>
+	<$ endif $>
+	
 	</script>
 
 	<script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/jquery-1.6.1.min.js"></script>
@@ -112,6 +116,7 @@
 <form class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post" id="get-archives-form">
 	<input type="hidden" name="IdcService" value="GET_ARCHIVES" />
 	<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+	<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 	<input type="hidden" name="IsJson" value="1" />
 </form>
 
@@ -272,7 +277,7 @@
 				success: function(data, textStatus) {
 					$('#dialog-view-batches-list').children().remove();
 					
-					if (data.ResultSets.BatchFiles.rows != null)
+					if (typeof data.ResultSets.BatchFiles !== "undefined")
 					{
 						var BatchFiles = data.ResultSets.BatchFiles.rows;
 						
@@ -605,7 +610,8 @@
 					IdcService: 'SPEEDY_ARCHIVER_UPLOAD',
 					IsSoap: 1,
 					archiveName: archiveName,
-					file: 'zipArchive'
+					file: 'zipArchive',
+					IDC_Name: '<$IDC_Name$>'
 				},
 				onSubmit : function(file, ext) {
 					$('#form-import-archive').find('input[name=aArchiveName]').val(archiveName);
@@ -882,6 +888,7 @@
 			<input type="hidden" name="EditItems" value="aExportQuery" />
 			<input type="hidden" class="archive-name" name="aArchiveName" value="" />
 			<input type="hidden" name="IsJson" value="1" />
+			<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 			
 			<input type="hidden" id="aExportQuery" name="aExportQuery" />
 		</form>
@@ -893,6 +900,7 @@
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
 		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
+		<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 		
 		<input type="hidden" name="dataSource" value="RevisionIDs" />
 		<input type="hidden" name="aArchiveName" value="" />
@@ -905,6 +913,7 @@
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
 		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
+		<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 		
 		<input type="hidden" name="aArchiveName" value="" />
 	</form>
@@ -915,6 +924,7 @@
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
 		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
+		<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 		
 		<input type="hidden" name="aArchiveName" value="" />
 		<input type="hidden" name="aBatchFile" value="" />
@@ -926,6 +936,7 @@
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
 		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
+		<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 		
 		<input type="hidden" name="aArchiveName" value="" />
 		<input type="hidden" name="aBatchFile" value="" />
@@ -937,6 +948,7 @@
 		<input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
 		<input type="hidden" name="RedirectUrl" value="" />
 		<input type="hidden" name="IsJson" value="1" />
+		<input type="hidden" name="idcToken" value="<$ idcToken $>" />
 		
 		<input type="hidden" name="aArchiveName" value="" />
 		<input type="hidden" name="aImportDocuments" value="true" />

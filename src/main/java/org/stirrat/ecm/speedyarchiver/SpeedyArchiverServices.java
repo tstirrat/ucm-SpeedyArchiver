@@ -6,7 +6,8 @@ import intradoc.common.SystemUtils;
 import intradoc.data.DataBinder;
 import intradoc.data.DataException;
 import intradoc.server.HttpImplementor;
-import intradoc.shared.SharedObjects;
+import intradoc.server.archive.ArchiveUtils;
+import intradoc.shared.CollectionData;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -53,10 +54,10 @@ public class SpeedyArchiverServices {
    *           If there is an error reading or accessing the zip file
    */
   @ServiceMethod(name = "SPEEDY_ARCHIVER_DOWNLOAD", template = "SPEEDY_ARCHIVER_HOME")
-  public void downloadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder,
-      HttpImplementor httpImpl) throws ServiceException {
+  public void downloadArchive(@Binder(name = "archiveName") String archiveName,
+      @Binder(name = "IDC_Name") String idcName, DataBinder binder, HttpImplementor httpImpl) throws ServiceException {
 
-    File archiveFolder = getArchiveBaseFolder(archiveName);
+    File archiveFolder = getArchiveBaseFolder(archiveName, idcName);
 
     File zipFile = null;
 
@@ -84,8 +85,8 @@ public class SpeedyArchiverServices {
    *          The service data binder
    */
   @ServiceMethod(name = "SPEEDY_ARCHIVER_UPLOAD", template = "SPEEDY_ARCHIVER_HOME")
-  public void uploadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder)
-      throws ServiceException, DataException {
+  public void uploadArchive(@Binder(name = "archiveName") String archiveName,
+      @Binder(name = "IDC_Name") String idcName, DataBinder binder) throws ServiceException, DataException {
 
     @SuppressWarnings("unchecked")
     Vector<String> v = binder.getTempFiles();
@@ -97,49 +98,21 @@ public class SpeedyArchiverServices {
     String uploadedFile = v.elementAt(0);
 
     // delete the existing folder
-    if (!archiveName.equalsIgnoreCase("")) {
-      String archiveFolderPath = getArchiveFolder(archiveName);
-
-      deleteRecursively(new File(archiveFolderPath));
-
-    } else {
-      binder.putLocal("uploadedArchive", "false - Deleting aborted!");
-      throw new ServiceException("archiveName is empty. Deleting aborted!");
-
+    if (archiveName.equalsIgnoreCase("")) {
+      binder.putLocal("uploadedArchive", "false");
+      throw new ServiceException("archiveName is empty");
     }
+
+    File archiveFolderPath = getArchiveBaseFolder(archiveName, idcName);
+    deleteRecursively(archiveFolderPath);
 
     // extract the contents of the uploaded zip
     try {
-      extractZipFile(uploadedFile, archiveName);
+      extractZipFile(uploadedFile, archiveFolderPath);
       binder.putLocal("uploadedArchive", "true");
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new ServiceException("error extracting archive " + archiveName + ": " + e.getMessage(), e);
     }
-  }
-
-  /**
-   * Returns the file path to an archive.
-   * 
-   * @param archiveName
-   * @return
-   */
-  private String getArchiveFolder(String archiveName) {
-    String archiveFolderPath = getArchiveBaseFolder() + archiveName;
-    return archiveFolderPath;
-  }
-
-  /**
-   * Get the root of the archive folder.
-   * 
-   * @return
-   */
-  private String getArchiveBaseFolder() {
-    String baseDir = SharedObjects.getEnvironmentValue("CollectionDir");
-
-    if (baseDir == null) {
-      baseDir = SharedObjects.getEnvironmentValue("IntradocDir") + "archives/";
-    }
-    return baseDir;
   }
 
   /**
@@ -147,18 +120,23 @@ public class SpeedyArchiverServices {
    * 
    * @param archiveName
    *          The archive job name
+   * @param idcName
+   *          The IDC_Name (collection name)
    * @return The folder where the archive job data is found.
    * @throws ServiceException
    *           If the job name is invalid.
    */
-  private File getArchiveBaseFolder(String archiveName) throws ServiceException {
+  private File getArchiveBaseFolder(String archiveName, String idcName) throws ServiceException {
 
-    File archiveFolder = new File(getArchiveBaseFolder() + archiveName);
+    CollectionData col;
+    try {
+      col = ArchiveUtils.getCollection(idcName);
 
-    if (!archiveFolder.exists()) {
-      // 11g is lower case
-      archiveFolder = new File(getArchiveBaseFolder() + archiveName.toLowerCase());
+    } catch (DataException e) {
+      throw new ServiceException("Unable to determine collection from IDC_Name: " + idcName);
     }
+
+    File archiveFolder = new File(ArchiveUtils.buildArchiveDirectory(col.m_location, archiveName));
 
     if (!archiveFolder.exists()) {
       throw new ServiceException("Archive folder " + archiveFolder.getAbsolutePath() + " does not exist!");
@@ -346,12 +324,12 @@ public class SpeedyArchiverServices {
    * Extract zip file into an archive folder.
    * 
    * @param zipFilename
-   * @param archiveName
+   * @param folder
    */
-  private void extractZipFile(String zipFilename, String archiveName) {
+  private void extractZipFile(String zipFilename, File folder) {
     try {
 
-      File archiveFolderPath = createDestinationFolder(getArchiveFolder(archiveName));
+      File archiveFolderPath = createDestinationFolder(folder);
 
       if (archiveFolderPath == null) {
         throw new ServiceException("Unable to create destination folder: " + archiveFolderPath);
@@ -411,11 +389,10 @@ public class SpeedyArchiverServices {
   /**
    * Create and return the archive folder path.
    * 
-   * @param archiveFolderPath
+   * @param dest
    * @return
    */
-  private File createDestinationFolder(String archiveFolderPath) {
-    File dest = new File(archiveFolderPath);
+  private File createDestinationFolder(File dest) {
 
     if (dest.exists()) {
       return dest;
