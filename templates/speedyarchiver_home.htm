@@ -48,6 +48,7 @@
     <br style="line-height:25px">
 
 	<$ executeService("SPEEDY_GET_ARCHIVES") $>
+	<$ rsSort("Archives", "aArchiveName", "string", "asc") $>
 
 	<$ if Archives $>
 		<$include archive_jobs_table $>
