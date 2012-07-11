@@ -5,9 +5,37 @@
 	<artifactId>speedy-archiver</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>Speedy Archiver</name>
+	<url>https://github.com/tstirrat/ucm-SpeedyArchiver</url>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git://github.com/tstirrat/ucm-SpeedyArchiver.git</connection>
+		<developerConnection>scm:git:git@github.com:tstirrat/ucm-SpeedyArchiver.git</developerConnection>
+		<url>https://github.com/tstirrat/ucm-SpeedyArchiver</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>Tim Stirrat</name>
+			<email>tim.stirrat@gmail.com</email>
+		</developer>
+		<developer>
+			<name>Vedran Stanic</name>
+		</developer>
+	</developers>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -33,6 +61,14 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.1</version>
+				<configuration>
+					<tag>v${project.version}</tag>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.ucmtwine</groupId>
@@ -99,6 +135,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
 	<profiles>
 		<profile>
 			<id>11g</id>
@@ -155,6 +192,7 @@
 			</dependencies>
 		</profile>
 	</profiles>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -173,4 +211,5 @@
 			<version>2.1</version>
 		</dependency>
 	</dependencies>
+
 </project>
