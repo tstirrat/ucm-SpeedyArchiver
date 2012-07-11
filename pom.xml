@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.stirrat</groupId>
 	<artifactId>speedy-archiver</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Speedy Archiver</name>
 	<url>https://github.com/tstirrat/ucm-SpeedyArchiver</url>
 
