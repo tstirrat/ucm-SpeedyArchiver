@@ -1,0 +1,10 @@
+1.0.2
+- FIXED: Accidentally removed sorting so archives were not alphabetically listed
+
+1.0.1
+- FIXED: (windows) replacing slashes in unzip routine causing import to fail
+
+1.0
+- Added auto refresh
+- Added dates and import counts
+- Code re-organisation (separated out js and css files)
