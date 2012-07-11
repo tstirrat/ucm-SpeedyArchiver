@@ -70,27 +70,27 @@
 					<tag>v${project.version}</tag>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.ucmtwine</groupId>
-				<artifactId>ucm-maven-plugin</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
-				<configuration>
-					<servers>
-						<server>
-							<id>ucmdev</id>
-							<url>http://ucmdev/cs/idcplg</url>
-							<username>sysadmin</username>
-							<password>idc</password>
-						</server>
-						<server>
-							<id>ucm11g</id>
-							<url>http://ucm11g/cs/idcplg</url>
-							<username>weblogic</username>
-							<password>weblogic1</password>
-						</server>
-					</servers>
-				</configuration>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.ucmtwine</groupId> -->
+<!-- 				<artifactId>ucm-maven-plugin</artifactId> -->
+<!-- 				<version>1.0.0-SNAPSHOT</version> -->
+<!-- 				<configuration> -->
+<!-- 					<servers> -->
+<!-- 						<server> -->
+<!-- 							<id>ucmdev</id> -->
+<!-- 							<url>http://ucmdev/cs/idcplg</url> -->
+<!-- 							<username>sysadmin</username> -->
+<!-- 							<password>idc</password> -->
+<!-- 						</server> -->
+<!-- 						<server> -->
+<!-- 							<id>ucm11g</id> -->
+<!-- 							<url>http://ucm11g/cs/idcplg</url> -->
+<!-- 							<username>weblogic</username> -->
+<!-- 							<password>weblogic1</password> -->
+<!-- 						</server> -->
+<!-- 					</servers> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 		<!-- Used to stop m2e "plugin lifecycle" errors. http://wiki.eclipse.org/M2E_plugin_execution_not_covered#execute_plugin_goal -->
 		<pluginManagement>
