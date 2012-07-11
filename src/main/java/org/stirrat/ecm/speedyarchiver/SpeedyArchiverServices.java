@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -445,7 +446,7 @@ public class SpeedyArchiverServices {
       while (zipFileEntry != null) {
 
         // convert to system folder separator char
-        String entryName = zipFileEntry.getName().replaceAll("\\\\|/", File.separator);
+        String entryName = zipFileEntry.getName().replaceAll("\\\\|/", Matcher.quoteReplacement(File.separator));
 
         SystemUtils.trace(traceSection, "entryname " + entryName);
 
