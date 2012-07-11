@@ -1,13 +1,17 @@
 package org.stirrat.ecm.speedyarchiver;
 
 import intradoc.common.DataStreamWrapper;
+import intradoc.common.ExecutionContext;
+import intradoc.common.LocaleResources;
 import intradoc.common.ServiceException;
 import intradoc.common.SystemUtils;
 import intradoc.data.DataBinder;
 import intradoc.data.DataException;
+import intradoc.data.DataResultSet;
 import intradoc.server.HttpImplementor;
 import intradoc.server.archive.ArchiveUtils;
 import intradoc.shared.CollectionData;
+import intradoc.shared.SharedObjects;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -40,6 +44,9 @@ public class SpeedyArchiverServices {
   private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
   private static final String traceSection = "speedyarchiver";
 
+  private static final String[] ARCHIVE_FIELDS = { "aArchiveName", "aLastExport", "aLastImport", "aTotalLastExported",
+      "aTotalLastImported" };
+
   /**
    * Used to download an archive as a zip file.
    * 
@@ -54,10 +61,10 @@ public class SpeedyArchiverServices {
    *           If there is an error reading or accessing the zip file
    */
   @ServiceMethod(name = "SPEEDY_ARCHIVER_DOWNLOAD", template = "SPEEDY_ARCHIVER_HOME")
-  public void downloadArchive(@Binder(name = "archiveName") String archiveName,
-      @Binder(name = "IDC_Name") String idcName, DataBinder binder, HttpImplementor httpImpl) throws ServiceException {
+  public void downloadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder,
+      HttpImplementor httpImpl) throws ServiceException {
 
-    File archiveFolder = getArchiveBaseFolder(archiveName, idcName);
+    File archiveFolder = getArchiveBaseFolder(archiveName);
 
     File zipFile = null;
 
@@ -85,8 +92,8 @@ public class SpeedyArchiverServices {
    *          The service data binder
    */
   @ServiceMethod(name = "SPEEDY_ARCHIVER_UPLOAD", template = "SPEEDY_ARCHIVER_HOME")
-  public void uploadArchive(@Binder(name = "archiveName") String archiveName,
-      @Binder(name = "IDC_Name") String idcName, DataBinder binder) throws ServiceException, DataException {
+  public void uploadArchive(@Binder(name = "archiveName") String archiveName, DataBinder binder)
+      throws ServiceException, DataException {
 
     @SuppressWarnings("unchecked")
     Vector<String> v = binder.getTempFiles();
@@ -103,7 +110,7 @@ public class SpeedyArchiverServices {
       throw new ServiceException("archiveName is empty");
     }
 
-    File archiveFolderPath = getArchiveBaseFolder(archiveName, idcName);
+    File archiveFolderPath = getArchiveBaseFolder(archiveName);
     deleteRecursively(archiveFolderPath);
 
     // extract the contents of the uploaded zip
@@ -113,6 +120,89 @@ public class SpeedyArchiverServices {
     } catch (Exception e) {
       throw new ServiceException("error extracting archive " + archiveName + ": " + e.getMessage(), e);
     }
+  }
+
+  @ServiceMethod(name = "SPEEDY_GET_ARCHIVES")
+  public void getArchives(DataBinder binder, ExecutionContext ctx) throws ServiceException, DataException {
+
+    CollectionData colData = getLocalCollectionData();
+
+    DataBinder archiveBinder = ArchiveUtils.readCollectionData(colData.m_location, false);
+
+    DataResultSet archives = (DataResultSet) archiveBinder.getResultSet("Archives");
+    DataResultSet outputRs = new DataResultSet(ARCHIVE_FIELDS);
+
+    for (; archives.isRowPresent(); archives.next()) {
+      String archiveName = archives.getStringValueByName("aArchiveName");
+
+      DataBinder archiveInfo = ArchiveUtils.readArchiveFile(colData.m_location, archiveName, false);
+
+      archiveInfo.putLocal("aArchiveName", archiveName);
+
+      Vector<Object> row = new Vector<Object>();
+
+      for (int i = 0; i < ARCHIVE_FIELDS.length; i++) {
+        String value = archiveInfo.getLocal(ARCHIVE_FIELDS[i]);
+        if (value != null && value.startsWith("{ts")) {
+          // TODO: get date
+          Date d = LocaleResources.parseDate(value, ctx);
+          row.add(binder.m_blDateFormat.format(d));
+
+        } else if (value != null) {
+          row.add(value);
+        } else {
+          row.add("");
+        }
+      }
+
+      outputRs.addRow(row);
+    }
+
+    binder.addResultSet("Archives", outputRs);
+  }
+
+  /**
+   * Get archive info for each archive as a resultset.
+   * 
+   * @param idcName
+   *          The collection name
+   * @param binder
+   *          The output data binder
+   */
+  @ServiceMethod(name = "SPEEDY_GET_ARCHIVE_INFO")
+  public void getArchiveInfo(@Binder(name = "aArchiveName") String archiveName, DataBinder binder)
+      throws ServiceException, DataException {
+
+    CollectionData col = getLocalCollectionData();
+
+    DataBinder archiveInfo = ArchiveUtils.readArchiveFile(col.m_location, archiveName, false);
+
+    // TODO: maybe expand query params to show in the archives table?
+    // String queryString = archiveInfo.getLocal("aExportQuery");
+    // ExportQueryData queryData = new ExportQueryData();
+    //
+    // queryData.parse(queryString);
+    //
+
+    binder.merge(archiveInfo);
+  }
+
+  /**
+   * Returns the local archiver collection data.
+   * 
+   * @return
+   * @throws ServiceException
+   */
+  private CollectionData getLocalCollectionData() throws ServiceException {
+    String idcName = SharedObjects.getEnvironmentValue("IDC_Name");
+    CollectionData col;
+    try {
+      col = ArchiveUtils.getCollection(idcName);
+
+    } catch (DataException e) {
+      throw new ServiceException("Unable to determine collection from IDC_Name: " + idcName);
+    }
+    return col;
   }
 
   /**
@@ -126,15 +216,8 @@ public class SpeedyArchiverServices {
    * @throws ServiceException
    *           If the job name is invalid.
    */
-  private File getArchiveBaseFolder(String archiveName, String idcName) throws ServiceException {
-
-    CollectionData col;
-    try {
-      col = ArchiveUtils.getCollection(idcName);
-
-    } catch (DataException e) {
-      throw new ServiceException("Unable to determine collection from IDC_Name: " + idcName);
-    }
+  private File getArchiveBaseFolder(String archiveName) throws ServiceException {
+    CollectionData col = getLocalCollectionData();
 
     File archiveFolder = new File(ArchiveUtils.buildArchiveDirectory(col.m_location, archiveName));
 
@@ -347,7 +430,8 @@ public class SpeedyArchiverServices {
 
       while (zipFileEntry != null) {
 
-        String entryName = zipFileEntry.getName();
+        // convert to system folder separator char
+        String entryName = zipFileEntry.getName().replaceAll("\\\\|/", File.separator);
 
         SystemUtils.trace(traceSection, "entryname " + entryName);
 

@@ -1,0 +1,76 @@
+.hide {
+	display: none;
+}
+
+.loading {
+	background: url("../images/loading.gif") -135px -135px transparent;
+	display: none;
+	height: 80px;
+	margin: auto;
+	width: 130px;
+}
+
+#dialog-view-batches {
+	position: relative;
+}
+
+#dialog-view-batches-status {
+	
+}
+
+#dialog-view-batches .container {
+	overflow: auto;
+}
+
+#dialog-view-batches table {
+	width: 100%;
+}
+
+#dialog-view-batches table th {
+	text-align: left;
+}
+
+#dialog-view-batches table td {
+	cursor: default;
+}
+
+#dialog-view-batches table .ui-selected {
+	background: url("../ui/css/redmond/images/ui-bg_gloss-wave_55_5c9ccc_500x100.png") 50% 50% repeat-x #5C9CCC;
+	color: white;
+}
+
+#dialog-view-batches table .ui-selected td {
+	color: white;
+}
+
+#dialog-view-batches table .ui-selecting {
+	background: #FECA40;
+}
+
+#dialog-view-batches-status {
+	height: 90px;
+	width: 100%;
+	overflow: auto;
+	position: absolute;
+	bottom: 0px;
+	left: 0;
+}
+
+.controls {
+	float: right;
+}
+
+#refresh-spinner {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+    background: white;	
+}
+
+#refresh-spinner.spinner-active {
+	background: url(../images/loader-small.gif) 0px 11px no-repeat;
+}
+
+#refresh-spinner span {
+	display: none;
+}

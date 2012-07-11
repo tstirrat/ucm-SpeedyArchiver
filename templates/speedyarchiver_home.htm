@@ -1,0 +1,82 @@
+<$include std_doctype_html_decl$>
+
+<head>
+	<$defaultPageTitle="Speedy Archiver"$>
+	
+	<$if not IdcService$>
+		<$DisableTargetedQuickSearchesUI = 1$>
+	<$endif$>
+	
+	<$searchFormType = "standard"$>
+	<$include std_html_head_declarations$>
+	
+	<script type="text/javascript">
+	<$if not IdcService$>
+		<$include str_trim_function$>
+	<$endif$>
+	<$include query_form_minisearch_script$>
+	
+	[[% 10g compat fix %]]
+	<$ if not idcToken $>
+	   <$ idcToken = "" $>
+	<$ endif $>
+	</script>
+	
+	<link type="text/css" rel="stylesheet" href="<$HttpWebRoot$>resources/speedy/ui/css/redmond/jquery-ui.css" />
+	<link type="text/css" rel="stylesheet" href="<$HttpWebRoot$>resources/speedy/css/speedy.css" />
+</head>
+
+<$if not IdcService$>
+    <body style="width:auto;height:auto;margin:10px;background:#FFFFFF">
+	<$include home_page_static_content$>
+<$else$>
+	<$include body_def$>
+	<$include std_page_begin$>
+<$endif$>
+
+<$include std_header$>
+
+	<table class="xuiTitleTable" width="100%" cellpadding="0" cellspacing="0" summary="">
+		<tr>
+			<td class="xuiPageHeadingCell">
+				<h1 class="xuiPageHeadingText">Speedy Archiver</h1></td>
+			<td class="xuiPageHeadingCell" style="text-align:right" align="right">
+				&nbsp;</td>
+		</tr>
+	</table>
+
+    <br style="line-height:25px">
+
+	<$ executeService("SPEEDY_GET_ARCHIVES") $>
+
+	<$ if Archives $>
+		<$include archive_jobs_table $>
+		<div class="controls">
+		  <label id="refresh-spinner" class="spinner-active" for="refresh-time" title="Refreshing..."><span>Refreshing every...</span></label>
+		  <select id="refresh-time">
+		      <option value="1000">1 second</option>
+		      <option value="3000">3 seconds</option>
+		      <option value="5000" selected="selected">5 seconds</option>
+		      <option value="10000">10 seconds</option>
+		      <option value="30000">30 seconds</option>
+		  </select>
+		  <button id="btn-refresh-toggle">Stop</button>
+		</div>
+	<$ else $>
+		<div class="xuiDescription">No archive jobs have been defined</div>
+	<$ endif $>
+	
+    <$ include speedy_dialogs $>
+    
+    <$ include speedy_ajax_forms $>
+
+	<$ include std_page_end $>
+	
+	<script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/js/lib/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/ui/js/jquery-ui-1.8.14.custom.min.js"></script>
+    <script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/js/lib/ajaxupload.3.6.min.js"></script>
+    <script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/js/lib/jquery.ucm.js"></script>
+    <script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/js/lib/date.js"></script>
+    <script type="text/javascript" src="<$HttpWebRoot$>resources/speedy/js/speedy.js"></script>
+</body>
+</html>

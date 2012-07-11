@@ -47,19 +47,13 @@
 							<password>idc</password>
 						</server>
 						<server>
-							<id>local</id>
-							<url>idc://localhost:4444</url>
+							<id>ucm11g</id>
+							<url>http://ucm11g/cs/idcplg</url>
+							<username>weblogic</username>
+							<password>weblogic1</password>
 						</server>
 					</servers>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>install</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<!-- Used to stop m2e "plugin lifecycle" errors. http://wiki.eclipse.org/M2E_plugin_execution_not_covered#execute_plugin_goal -->

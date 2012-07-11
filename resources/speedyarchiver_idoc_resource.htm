@@ -9,7 +9,7 @@ SpeedyArchiver htmlIncludeOrString
 
 <@dynamicdata CoreMenuItems@>
 id, label, linkType, linkData
-SPEEDY, Speedy Archive, cgi, IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME
+SPEEDY, Speedy Archiver, cgi, IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME
 <@end@>
 
 <@dynamicdata CoreMenuItemRelationships@>
@@ -29,73 +29,30 @@ SPEEDY, ScsPageItem.gif,
 <@end@>
 
 <@dynamichtml custom_finish_layout_init@>
-
   <$ include super.custom_finish_layout_init $>
-
   <$ if UserIsAdmin $>
-
-  if (navBuilder.menuB)
-  {
-  	navBuilder.menuB.addTopLevelNode('SPEEDY_ARCHIVE','SEARCH');       
-  	navBuilder.addChildNodeTo('NAVTREE', 'item', 'id==SPEEDY_ARCHIVE', 'label==Speedy Archive', 'url==<$HttpCgiPath$>?IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME');
-  }
-
+	  if (navBuilder.menuB) {
+	  	navBuilder.menuB.addTopLevelNode('SPEEDY','SEARCH');       
+	  	navBuilder.addChildNodeTo('NAVTREE', 'item', 'id==SPEEDY', 'label==Speedy Archiver', 'url==<$HttpCgiPath$>?IdcService=GET_DOC_PAGE&Action=GetTemplatePage&Page=SPEEDY_ARCHIVER_HOME');
+	  }
   <$ endif $>
-    
-
 <@end@>
 
 <@dynamichtml archive_jobs_table@>
-	<$slimTableCaption = "<caption class=\"xuiCaption\">Archive Jobs</caption>"$>
-	<$resultSetClass = "document", resultSetType = "activeworkflow"$>
+	<$ slimTableCaption = "<caption class=\"xuiCaption\">Archive Jobs</caption>" $>
+	<$ resultSetClass = "document", resultSetType = "activeworkflow" $>
 
-	<$exec inc("setup_archive_jobs_table_header")$>
-	<$include slim_table_header$>
+	<$ exec inc("setup_archive_jobs_table_header") $>
+	<$ include slim_table_header $>
 
-	<$exec inc("setup_archive_jobs_table_row")$>
-	<$exec inc("create_slim_table_row_include")$>
+	<$ exec inc("setup_archive_jobs_table_row") $>
+	<$ exec inc("create_slim_table_row_include") $>
 	
-	<$loop ArchiveData$>
-		<$include slim_table_row_include$>
-	<$endloop$>
+	<$ loop Archives $>
+		<$ include slim_table_row_include $>
+	<$ endloop $>
 
-	<$include slim_table_footer$>
-<@end@>
-
-
-<@dynamichtml setup_archive_jobs_table_row@>
-	<$exec setValue("RowData", "name", "<$ aArchiveName $>")$>
-	<$exec setValue("RowData", "status", "<$ include speedy_archive_status $>")$>
-	<$exec setValue("RowData", "actions", "<$ include speedy_archive_action_links $>")$>
-<@end@>
-
-<@dynamichtml speedy_archive_status@>
-	<span id="status-<$ aArchiveName $>" class="status">
-		<$ if uploadedArchive like "true" and strEquals(aArchiveName, archiveName) $>
-			Upload Complete
-		<$ endif $>
-	</span>
-<@end@>
-
-<@dynamichtml speedy_archive_action_links@>
-	<div id="<$ aArchiveName $>" class="actions">
-		[<a rel="<$ ArchiveData.aArchiveName $>" class="download-action xuiLinkText2_Sm" href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ArchiveData.aArchiveName$>&IDC_Name=<$IDC_Name$>">Download</a>]
-		
-		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="upload-action xuiLinkText2_Sm" href="#">Upload</a>]
-						
-		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="edit-query xuiLinkText2_Sm">Edit Query</a>]
-	
-		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="export-action xuiLinkText2_Sm">Export</a>]
-	
-		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="import-action xuiLinkText2_Sm">Import</a>]
-		
-		[<a href="#" rel="<$ ArchiveData.aArchiveName $>" class="batch-action xuiLinkText2_Sm">View Batches</a>]
-		
-		<!-- config -->
-		<form class="hide">
-			<input type="hidden" class="config" name="config" />
-		</form>
-	</div>
+	<$ include slim_table_footer $>
 <@end@>
 
 <@dynamichtml setup_archive_jobs_table_header@>
@@ -104,9 +61,33 @@ SPEEDY, ScsPageItem.gif,
 
 	<$exec rsAppendNewRow("ColumnProperties")$>
 	<$exec setValue("ColumnProperties", "id", "name")$>
-	<$exec setValue("ColumnProperties", "width", "150px")$>
-	<$exec setValue("ColumnProperties", "headerLabel", "Archive Name")$>
+	<$exec setValue("ColumnProperties", "width", "120px")$>
+	<$exec setValue("ColumnProperties", "headerLabel", "Name")$>
 	<$exec setValue("ColumnProperties", "rowAlign", "left")$>
+	
+	<$exec rsAppendNewRow("ColumnProperties")$>
+    <$exec setValue("ColumnProperties", "id", "lastExported")$>
+    <$exec setValue("ColumnProperties", "width", "120px")$>
+    <$exec setValue("ColumnProperties", "headerLabel", "Last Export Date")$>
+    <$exec setValue("ColumnProperties", "rowAlign", "center")$>
+	
+	<$exec rsAppendNewRow("ColumnProperties")$>
+    <$exec setValue("ColumnProperties", "id", "exported")$>
+    <$exec setValue("ColumnProperties", "width", "60px")$>
+    <$exec setValue("ColumnProperties", "headerLabel", "Exported")$>
+    <$exec setValue("ColumnProperties", "rowAlign", "right")$>
+    
+    <$exec rsAppendNewRow("ColumnProperties")$>
+    <$exec setValue("ColumnProperties", "id", "lastImported")$>
+    <$exec setValue("ColumnProperties", "width", "120px")$>
+    <$exec setValue("ColumnProperties", "headerLabel", "Last Import Date")$>
+    <$exec setValue("ColumnProperties", "rowAlign", "center")$>
+    
+    <$exec rsAppendNewRow("ColumnProperties")$>
+    <$exec setValue("ColumnProperties", "id", "imported")$>
+    <$exec setValue("ColumnProperties", "width", "60px")$>
+    <$exec setValue("ColumnProperties", "headerLabel", "Imported")$>
+    <$exec setValue("ColumnProperties", "rowAlign", "right")$>
 
 	<$exec rsAppendNewRow("ColumnProperties")$>
 	<$exec setValue("ColumnProperties", "id", "status")$>
@@ -122,5 +103,204 @@ SPEEDY, ScsPageItem.gif,
 	<$tableSummary = "Archive Jobs"$>
 <@end@>
 
+<@dynamichtml setup_archive_jobs_table_row@>
+    <$exec setValue("RowData", "name", "<$ aArchiveName $>")$>
+    <$exec setValue("RowData", "lastExported", "<span id=\"export-date-<$ aArchiveName $>\"><$ aLastExport $></span>")$>
+    <$exec setValue("RowData", "exported", "<span id=\"export-count-<$ aArchiveName $>\"><$ aTotalLastExported $></span>")$>
+    <$exec setValue("RowData", "lastImported", "<span id=\"import-date-<$ aArchiveName $>\"><$ aLastImport $></span>")$>
+    <$exec setValue("RowData", "imported", "<span id=\"import-count-<$ aArchiveName $>\"><$ aTotalLastImported $></span>")$>
+    <$exec setValue("RowData", "status", "<span id=\"status-<$ aArchiveName $>\"></span>")$>
+    <$exec setValue("RowData", "actions", "<$ include speedy_archive_action_links $>")$>
+<@end@>
+
+<@dynamichtml speedy_archive_action_links@>
+    <div id="<$ aArchiveName $>" class="actions">
+        [<a rel="<$ aArchiveName $>" class="download-action xuiLinkText2_Sm" href="<$HttpRelativeWebRoot$>idcplg?IdcService=SPEEDY_ARCHIVER_DOWNLOAD&archiveName=<$ aArchiveName $>">Download</a>]
+        
+        [<a href="#" rel="<$ aArchiveName $>" class="upload-action xuiLinkText2_Sm" href="#">Upload</a>]
+                        
+        [<a href="#" rel="<$ aArchiveName $>" class="edit-query xuiLinkText2_Sm">Edit Query</a>]
+    
+        [<a href="#" rel="<$ aArchiveName $>" class="export-action xuiLinkText2_Sm">Export</a>]
+    
+        [<a href="#" rel="<$ aArchiveName $>" class="import-action xuiLinkText2_Sm">Import</a>]
+        
+        [<a href="#" rel="<$ aArchiveName $>" class="batch-action xuiLinkText2_Sm">View Batches</a>]
+        
+        <!-- config -->
+        <form class="hide">
+            <input type="hidden" class="config" name="config" />
+        </form>
+    </div>
+<@end@>
+
+
+<@ dynamichtml speedy_ajax_forms @>
+    <!-- GET_ARCHIVES form -->
+	<form id="get-archives-form" class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post">
+	    <input type="hidden" name="IdcService" value="GET_ARCHIVES" />
+	    <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+	    <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+	    <input type="hidden" name="IsJson" value="1" />
+	</form>
+
+    <!-- EDIT_ARCHIVEDATA form -->
+    <form id="edit-archivedata-form" class="hide" action="<$HttpRelativeWebRoot$>idcplg" method="post">
+        <input type="hidden" name="IdcService" value="EDIT_ARCHIVEDATA" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="EditItems" value="aExportQuery" />
+        <input type="hidden" class="archive-name" name="aArchiveName" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" id="aExportQuery" name="aExportQuery" />
+    </form>
+        
+    <!-- EXPORT_ARCHIVE -->
+    <form id="form-export-archive" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+        <input type="hidden" name="IdcService" value="EXPORT_ARCHIVE" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="RedirectUrl" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" name="dataSource" value="RevisionIDs" />
+        <input type="hidden" name="aArchiveName" value="" />
+        <input type="hidden" name="aDoDelete" value="0" />
+    </form>
+    
+    <!-- GET_BATCHFILES FORM -->
+    <form id="form-get-batchfiles" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+        <input type="hidden" name="IdcService" value="GET_BATCHFILES" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="RedirectUrl" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" name="aArchiveName" value="" />
+    </form>
+    
+    <!-- DELETE_BATCH_FILE FORM -->
+    <form id="form-delete-batch" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+        <input type="hidden" name="IdcService" value="DELETE_BATCH_FILE" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="RedirectUrl" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" name="aArchiveName" value="" />
+        <input type="hidden" name="aBatchFile" value="" />
+    </form>
+    
+    <!-- IMPORT_BATCH_FILE FORM -->
+    <form id="form-import-batch" class="hide export" method="post" action="<$HttpRelativeWebRoot$>idcplg">
+        <input type="hidden" name="IdcService" value="IMPORT_BATCHFILE" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="RedirectUrl" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" name="aArchiveName" value="" />
+        <input type="hidden" name="aBatchFile" value="" />
+    </form>
+    
+    <!-- IMPORT_ARCHIVE FORM -->
+    <form id="form-import-archive" class="hide import" method="post" action="<$ HttpRelativeWebRoot $>idcplg">
+        <input type="hidden" name="IdcService" value="IMPORT_ARCHIVE" />
+        <input type="hidden" name="IDC_Name" value="<$ IDC_Name $>" />
+        <input type="hidden" name="RedirectUrl" value="" />
+        <input type="hidden" name="IsJson" value="1" />
+        <input type="hidden" name="idcToken" value="<$ idcToken $>" />
+        
+        <input type="hidden" name="aArchiveName" value="" />
+        <input type="hidden" name="aImportDocuments" value="true" />
+        <input type="hidden" name="aImportDocConfig" value="false" />
+    </form>
+    
+<@ end @>
+
+<@ dynamichtml speedy_dialogs @>
+    <!-- upload dialog -->
+    <div id="dialog-upload-info" class="hide dialog" title="Uploading">
+        <div class="message"></div>
+        <div class="loading"></div>
+    </div>
+    
+    <!-- Export query dialog -->
+    <div id="dialog-export" class="hide dialog" title="Export">
+        <div id="dialog-export-options">
+	        <input id="delete-old-archives" type="checkbox" value="yes" /><label for="delete-old-archives">Clear all batch files before exporting</label><br />
+	        <input id="delete-content" type="checkbox" value="yes" /><label for="delete-content">Delete exported content</label>
+	    </div>
+        <div id="dialog-export-status" class="status"></div>
+    </div>
+    
+    <!-- View batchfiles dialog -->
+    <div id="dialog-view-batches" class="hide dialog" title="Batch files">
+        <input type="hidden" id="dialog-view-batches-selected" />
+        <div class="container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Items</th>
+                        <th>State</th>
+                    </tr>
+                </thead>
+                
+                <tbody id="dialog-view-batches-list">
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="dialog-view-batches-status" class="status"></div>
+    </div>
+    
+    <!-- Edit query dialog -->
+    <div id="edit-query-dialog" class="hide dialog" title="Edit Query Options">
+        <form id="edit-query-form">
+            <input type="hidden" id="edit-query-form-valid" value="0" />
+            <div class="group">
+                <div>
+                    <!-- div>
+                        <input type="checkbox" id="IsCustom" name="IsCustom" />
+                        <label for="IsCustom">Custom Query Expression</label>
+                    </div -->
+                    <textarea id="CustomQuery" rows="5" cols="75">dSecurityGroup = 'Public' AND dDocName LIKE 'D%'</textarea>
+                </div>
+                
+                <div>
+                    <h2>Query Options</h2>
+                    <div>
+                        <input type="checkbox" id="UseExportDate" name="UseExportDate" value="1" checked="checked" />
+                        <label for="UseExportDate">Export Revisions with Release Date later than most recent Export Date</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="AllowExportPublished" name="AllowExportPublished" value="1" />
+                        <label for="AllowExportPublished">Allow export of Published Revisions</label>
+                    </div>
+                    <input type="radio" id="AllRevisions" name="RevisionType" value="AllRevisions" />
+                    <label for="AllRevisions">All Selected Revisions</label>
+                    
+                    <input type="radio" id="LatestRevisions" name="RevisionType" value="LatestRevisions" checked="checked" />
+                    <label for="LatestRevisions">Latest Revisions</label>
+                    
+                    <input type="radio" id="NotLatestRevisions" name="RevisionType" value="NotLatestRevisions" />
+                    <label for="NotLatestRevisions">Not Latest Revisions</label>
+                    
+                    <input type="radio" id="MostRecentMatching" name="RevisionType" value="MostRecentMatching" />
+                    <label for="MostRecentMatching">Single Revision Replication</label>
+                </div>
+            </div>
+        </form>
+        <div id="edit-query-wait">
+            Loading query details for <span class="archive-name">Archive name</span>, please wait...
+        </div>
+    </div>
+<@ end @>
 
 </body></html>
