@@ -3,10 +3,11 @@
 ComponentName=SpeedyArchiver
 blDateFormat=M/d/yy {h:mm[:ss] {aa}[zzz]}!mAM,PM!tAustralia/Sydney
 blFieldTypes=
-classpath=$COMPONENT_DIR/lib/commons-io-2.1.jar;$COMPONENT_DIR/lib/commons-lang-2.6.jar;$COMPONENT_DIR/lib/junit-4.8.1.jar;$COMPONENT_DIR/lib/speedy-archiver-1.0.3.jar
+classpath=$COMPONENT_DIR/lib/commons-io-2.1.jar;$COMPONENT_DIR/lib/commons-lang-2.6.jar;$COMPONENT_DIR/lib/junit-4.8.1.jar;$COMPONENT_DIR/lib/speedy-archiver-1.0.4-SNAPSHOT.jar
 hasPreferenceData=0
 preventAdditionalComponentDowngrade=0
-version=1.0.3
+version=1.0.4-SNAPSHOT
+requiredFeatures=Twine:0.9.1
 @end
 @ResultSet ResourceDefinition
 4
