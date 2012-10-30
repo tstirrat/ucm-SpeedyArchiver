@@ -14,7 +14,7 @@ SpeedyArchiver/SpeedyArchiver.hda
 componentLib
 SpeedyArchiver/lib/
 componentExtra
-SpeedyArchiver/readme/
+SpeedyArchiver/readme.md
 componentExtra
 SpeedyArchiver/resources/speedy/
 @end
