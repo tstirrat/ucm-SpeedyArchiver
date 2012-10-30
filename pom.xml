@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.stirrat</groupId>
 	<artifactId>SpeedyArchiver</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<name>Speedy Archiver</name>
 	<url>https://github.com/tstirrat/ucm-SpeedyArchiver</url>
 
@@ -23,7 +23,8 @@
 		<connection>scm:git:git://github.com/tstirrat/ucm-SpeedyArchiver.git</connection>
 		<developerConnection>scm:git:git@github.com:tstirrat/ucm-SpeedyArchiver.git</developerConnection>
 		<url>https://github.com/tstirrat/ucm-SpeedyArchiver</url>
-	</scm>
+	  <tag>v1.0.3</tag>
+  </scm>
 
 	<developers>
 		<developer>
