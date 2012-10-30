@@ -1,3 +1,7 @@
+1.0.3
+- Fixed potential unclosed InputStream in services
+- Updated to use Twine 0.9.1
+
 1.0.2
 - FIXED: Accidentally removed sorting so archives were not alphabetically listed
 
