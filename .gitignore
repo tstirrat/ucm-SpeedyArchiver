@@ -4,3 +4,4 @@ manifest.zip
 target
 ._*
 .DS*
+lockwait.dat
